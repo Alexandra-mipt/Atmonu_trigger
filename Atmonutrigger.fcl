@@ -1,0 +1,74 @@
+BEGIN_PROLOG
+
+track_long_procedure:
+{
+# Module Configuration
+    module_type:       "Tracktrigger"
+    TrackModuleTag:    "selectcontainedslice:ContainedTimeSpaceSlice"
+    SliceModuleTag:    "selectcontainedslice:ContainedTimeSpaceSlice"
+
+
+# Trigger Configuration
+                         is_long_procedure: true
+                         gaps_min:         0.0
+                         gaps_max:         1e9
+                         length_min:       40.0
+                         length_max:       1e9
+                         max_gap:          6
+                         epsilon:          1.6
+                         total_hits_min:   26
+                         total_hits_max:   193
+
+                         length_weight:    0.5
+                         hits_weight:      0.1
+                         gaps_weight:      0.8
+                         score_threshold: -0.3
+
+                         xz_cut:          10.8
+                         yz_cut:          18.0
+                         xy_cut:          0.0
+
+                         min_hits:        11
+}
+
+track_short_procedure:
+{
+# Module Configuration
+    module_type:       "Tracktrigger"
+    TrackModuleTag:    "selectcontainedslice:ContainedTimeSpaceSlice"
+    SliceModuleTag:    "selectcontainedslice:ContainedTimeSpaceSlice"
+ 
+# Trigger Configuration
+
+                        gaps_min:         0.0
+                        gaps_max:         1e9
+                        length_min:       40.0
+                        length_max:       1e9
+                        max_gap:          6
+                        epsilon:          1.6
+                        total_hits_min:   26
+                        total_hits_max:   193
+    
+                        length_weight:    0.5
+                        hits_weight:      0.1
+                        gaps_weight:      0.8
+    
+                        xz_cut:          19.8
+                        yz_cut:          24
+                        xy_cut:          0.0
+    
+}
+
+non_track_procedure:
+{
+# Module Configuration
+    module_type:
+    SliceModuleTag:    "notrackSlices"
+
+# Trigger Configuration
+
+                        model_filename:  "gb_model_cpp.txt"
+                        thr_opt:         0.63875492f
+}
+
+END_PROLOG

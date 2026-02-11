@@ -1,0 +1,176 @@
+#include "selectcontainedslice.fcl"
+#include "DAQInput.fcl"
+#include "DDTservices.fcl"
+#include "EventPrescale.fcl"
+#include "FastMMTrigger.fcl"
+#include "NNFastMMTrigger.fcl"
+#include "HighADCFilter.fcl"
+#include "HighETrigger.fcl"
+#include "HoughTracker.fcl"
+##include "LiveDataStream.fcl"
+#include "Merge2DTracks.fcl"
+#include "MoonShadow.fcl"
+#include "NovaDDTHitProducer.fcl"
+#include "NuMuTrigger.fcl"
+#include "RemoveNoise.fcl"
+##include "RemoveOneDSlices.fcl"
+#include "RemoveSpatialNoise.fcl"
+#include "RestrictHitsByPlane.fcl"
+#include "RootFileReader.fcl"
+##include "SendTriggerSignal.fcl"
+#include "SingletonRejection.fcl"
+#include "SlicePrescale.fcl"
+#include "SlowMonopoleTrigger.fcl"
+#include "SortByTDC.fcl"
+#include "SpaceSlice.fcl"
+#include "TimeSlice.fcl"
+#include "TrackFit.fcl"
+#include "TriCellTrigger.fcl"
+#include "UpMuTrigger.fcl"
+#include "StaticMapService.fcl"
+##include "SNMessageService.fcl"
+#include "NoiseHitFinder.fcl"
+#include "HitSubtract.fcl"
+#include "MichelEfinder.fcl"
+#include "HighEFinder.fcl"
+#include "SupernovaTrigger.fcl"
+#include "Multiplet.fcl"
+#include "MichelETrigger.fcl"
+##include "ChannelMapMaker.fcl"
+##include "HotMapMaker.fcl"
+#include "DropoutDCMFilter.fcl"
+#include "NeutronOscTrigger.fcl"
+#include "HorizontalMuonTrigger.fcl"
+
+services:
+{
+  @table::standard_services
+  TFileService: { fileName: "triggers.tree.root" closeFileFast: false }
+}
+
+physics:
+{
+  producers:
+  {
+    #hitProducer:        @local::standard_novaddthitproducer
+    hitProducer:       {module_type:"HitSubtract" label: "AllHits" expr:"daqhit"}
+    track:              @local::standard_trackfit
+    noisefinder:        @local::standard_noisehitfinder
+    hitsSN0:            @local::supernova_hitsub
+    hitsSN:             @local::supernova_hitsub
+    michel:             @local::standard_michel
+  }
+
+  filters:
+  {
+    tdcsort:                @local::standard_tdcsort
+    dcmfilter:              @local::dropdcmfilter_fd
+    singletonrejection:     @local::standard_singletonrejection
+    timeslice:              @local::singletonrejection_timeslice
+    removenoise:            @local::standard_removenoise
+    spaceslice:             @local::standard_spaceslice
+    multiplet:              @local::corrected_multiplet
+    removespatialnoise:     @local::standard_removespatialnoise
+    #removeonedslices:       @local::standard_removeonedslices
+    selectcontainedslice:   @local::standard_containedslice
+    houghtrackercontained:  @local::standard_houghtracker_numu_contained
+    #merge2dtracks:          @local::loose_merge2dtracks_hough_contained
+    merge2dtracks:          @local::standard_merge2dtracks_hough_contained
+    houghtracker:           @local::standard_houghtracker_numu
+    merge2dtracksthru:      @local::standard_merge2dtracks_hough
+    
+    highefinder:               @local::standard_highefinder
+    prescale:                  @local::standard_sliceprescale
+  }
+
+  analyzers:
+  {
+  save3dtracks: { 
+    module_type: "trackAna3d" 
+    tracks_tag: "merge2dtracksthru" 
+    slices_tag: "removespatialnoise:CleanTimeSpaceSlice"
+    assns_tag: "merge2dtracksthru:toSlices"
+    verbose: true
+    } 
+  saveslices: {module_type: "hitsAna" hits_tag:"removespatialnoise:CleanTimeSpaceSlice"}
+  #hitsAna1: {module_type: "hitsAna" hits_tag:"selectcontainedslice:ContainedTimeSpaceSlice" outputFileName: "hits_containedSlice.bin"}
+  save3dtrackslices: {module_type: "hitsAna" hits_tag:"merge2dtracksthru" outputFileName: "slice_tracks.bin"}
+  #hitsAna1: {module_type: "hitsAna" hits_tag:"removespatialnoise:CleanTimeSpaceSlice" outputFileName: "hits_removespatialnoise.bin" }
+  #mapmaker: @local::standard_hotmapmaker
+ }
+
+
+ supernova:  [
+    hitProducer, tdcsort, singletonrejection, timeslice,
+    removenoise, spaceslice, removespatialnoise, 
+    #removeonedslices, 
+    selectcontainedslice, 
+    #houghtrackercontained, merge2dtracks, 
+    houghtracker, merge2dtracksthru #, 
+#    michel,
+#    dcmfilter,
+#    noisefinder,
+#    highefinder,
+#    hitsSN0,
+#    hitsSN,
+#    multiplet
+#    supernovatrigger
+    ]
+
+ ana: [save3dtracks, saveslices, save3dtrackslices] #, trackdata, hitsana]
+ #ana: [saveslices] #, trackdata, hitsana]
+ output: [out]
+ end_paths: [ana, output]
+
+}
+
+
+outputs:
+{
+   out:{
+      module_type: RootOutput
+      fileName: "datahough.artdaq.root"
+      fastCloning: false
+   }
+
+}
+
+daq:              @local::standard_daq
+daq.queue_depth:  2
+# daq.n_events:    100
+
+# if using ddt-filter binary:
+#process_name:     DDT
+#source:           @local::live_data_stream
+
+# if using nova binary:
+process_name:     DDTOffline
+source:           @local::root_file_reader
+# Miscellaneous Settings:
+physics.filters.merge2dtracksthru.MinHits:           60
+
+physics.filters.highefinder.slice_cuts.ADC.min: 1000000
+physics.filters.dcmfilter.hits_tag:   "hitProducer:AllHits"
+physics.filters.multiplet.InputTag:   "hitsSN:hitsub"
+
+physics.producers.hitsSN0.expr: "hitProducer:AllHits-houghtracker[]-michel-highefinder[]"
+physics.producers.hitsSN.expr: "hitsSN0:hitsub-noisefinder"
+physics.producers.noisefinder.Noise.min: 1
+physics.filters.selectcontainedslice.SliceModuleLabel: "removespatialnoise"
+physics.filters.selectcontainedslice.SliceInstanceLabel: "CleanTimeSpaceSlice"
+physics.filters.houghtracker.slice_label: "removespatialnoise"
+physics.filters.houghtracker.slice_instance: "CleanTimeSpaceSlice"
+
+physics.filters.merge2dtracksthru.SliceModuleLabel: "removespatialnoise"
+physics.filters.merge2dtracksthru.SliceInstanceLabel: "CleanTimeSpaceSlice"
+
+
+
+#noise map configuration
+services.StaticMapService.source:"/home/novadaq/ddt/NoiseMaps/mask.FD.nhm"
+
+physics.filters.multiplet.slicer.MaxSliceSize: 1000
+
+# The following two lines turn on the time reporting:
+# services.TimeTracker:                                    { }
+# services.schedulnner.wantSummary:                     true

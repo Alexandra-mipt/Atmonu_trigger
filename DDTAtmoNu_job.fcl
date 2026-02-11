@@ -1,0 +1,128 @@
+#include "selectcontainedslice.fcl"
+#include "DAQInput.fcl"
+#include "DDTservices.fcl"
+#include "EventPrescale.fcl"
+#include "HighADCFilter.fcl"
+#include "HoughTracker.fcl"
+##include "LiveDataStream.fcl"
+#include "Merge2DTracks.fcl"
+#include "MoonShadow.fcl"
+#include "NovaDDTHitProducer.fcl"
+#include "RemoveNoise.fcl"
+##include "RemoveOneDSlices.fcl"
+#include "RemoveSpatialNoise.fcl"
+#include "RestrictHitsByPlane.fcl"
+#include "RootFileReader.fcl"
+#include "SingletonRejection.fcl"
+#include "SlicePrescale.fcl"
+#include "SortByTDC.fcl"
+#include "SpaceSlice.fcl"
+#include "TimeSlice.fcl"
+#include "TrackFit.fcl"
+#include "StaticMapService.fcl"
+##include "SNMessageService.fcl"
+#include "NoiseHitFinder.fcl"
+#include "HitSubtract.fcl"
+#include "MichelEfinder.fcl"
+#include "HighEFinder.fcl"
+#include "Multiplet.fcl"
+##include "ChannelMapMaker.fcl"
+##include "HotMapMaker.fcl"
+#include "DropoutDCMFilter.fcl"
+
+services:
+{
+  @table::standard_services
+  TFileService: { fileName: "triggers.tree.root" closeFileFast: false }
+}
+
+physics:
+{
+  producers:
+  {
+    #hitProducer:        @local::standard_novaddthitproducer
+    hitProducer:       {module_type:"HitSubtract" label: "AllHits" expr:"daqhit"}
+    track:              @local::standard_trackfit
+  }
+
+  filters:
+  {
+    tdcsort:                @local::standard_tdcsort
+    singletonrejection:     @local::standard_singletonrejection
+    timeslice:              @local::singletonrejection_timeslice
+    removenoise:            @local::standard_removenoise
+    spaceslice:             @local::standard_spaceslice
+    multiplet:              @local::corrected_multiplet
+    removespatialnoise:     @local::standard_removespatialnoise
+    #removeonedslices:       @local::standard_removeonedslices
+    selectcontainedslice:   @local::standard_containedslice
+    houghtrackercontained:  @local::standard_houghtracker_numu_contained
+    #merge2dtracks:          @local::loose_merge2dtracks_hough_contained
+    merge2dtracks:          @local::standard_merge2dtracks_hough_contained
+    houghtracker:           @local::standard_houghtracker_numu
+    merge2dtracksthru:      @local::standard_merge2dtracks_hough
+    prescale:                 @local::standard_sliceprescale
+
+    notrackSlices:    {
+        module_type:"SelectNotrackSlices"
+        slices_tag: "selectcontainedslice:ContainedTimeSpaceSlice"
+        assns_tag:  "merge2dtracksthru:toSlices"
+    }
+  }
+
+  analyzers:
+{}
+
+ atmonu:  [
+    hitProducer, tdcsort, singletonrejection, timeslice,
+    removenoise, spaceslice, removespatialnoise, 
+    #removeonedslices, 
+    selectcontainedslice, 
+    #houghtrackercontained, merge2dtracks, 
+    houghtracker, merge2dtracksthru, 
+    notrackSlices
+#    dcmfilter,
+    ]
+
+ output: [out]
+ end_paths: [output]
+
+}
+
+
+outputs:
+{
+   out:{
+      module_type: RootOutput
+      fileName: "datahough.artdaq.root"
+      fastCloning: false
+   }
+
+}
+
+daq:              @local::standard_daq
+daq.queue_depth:  2
+# daq.n_events:    100
+
+# if using ddt-filter binary:
+#process_name:     DDT
+#source:           @local::live_data_stream
+
+# if using nova binary:
+process_name:     DDTOffline
+source:           @local::root_file_reader
+# Miscellaneous Settings:
+physics.filters.merge2dtracksthru.MinHits:           60
+
+
+physics.filters.selectcontainedslice.SliceModuleLabel: "removespatialnoise"
+physics.filters.selectcontainedslice.SliceInstanceLabel: "CleanTimeSpaceSlice"
+physics.filters.houghtracker.slice_label: "selectcontainedslice"
+physics.filters.houghtracker.slice_instance: "ContainedTimeSpaceSlice"
+
+physics.filters.merge2dtracksthru.SliceModuleLabel: "selectcontainedslice"
+physics.filters.merge2dtracksthru.SliceInstanceLabel: "ContainedTimeSpaceSlice"
+
+# The following two lines turn on the time reporting:
+# services.TimeTracker:                                    { }
+# services.schedulnner.wantSummary:                     true
