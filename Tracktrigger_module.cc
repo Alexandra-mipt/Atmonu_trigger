@@ -22,6 +22,7 @@
 #include "Tracktrigger.h"
 #include "DDTBaseDataProducts/Track3D.h"
 #include "DDTBaseDataProducts/HitList.h"
+#include "DDTBaseDataProducts/DAQHit.h"
 #include "DDTBaseDataProducts/TriggerDecision.h"
 
 #include <memory>
@@ -32,16 +33,8 @@ namespace novaddt {
   class Tracktrigger;
 }
 
-struct Hit {
-    int hitSet_id;
-    int plane;
-    int cell;
-    int adc;
-    long long tdc;
-    int view;
-    bool used;
 
-    void Hit(const novaddt::DAQHit& h, int slice_id):
+Hit::Hit(const novaddt::DAQHit& h, int slice_id):
     hitSet_id(slice_id),
     plane(h.Plane().val),
     cell(h.Cell().val),
@@ -51,16 +44,8 @@ struct Hit {
     used(false)
     {}
 
-};
 
-struct Track {
-    int fView;
-    double StartX, StartY, StartZ;
-    double EndX, EndY, EndZ;
-    int sliceID;
-//    int hitSet_id;
-
-    void Track(const novaddt::Track3D& t, int slice_id):
+Track::Track(const novaddt::Track3D& t, int slice_id):
     fView(t.View()),
     StartX(t.Start().X()),
     StartY(t.Start().Y()),
@@ -70,7 +55,6 @@ struct Track {
     EndZ(t.End().Z()),
     sliceID(slice_id)
     { }
-};
 
 
 class novaddt::Tracktrigger : public art::EDFilter {
@@ -88,7 +72,7 @@ public:
 private:
 
       std::string _TrackModuleTag;
-      std::string _SliceModuleTag;
+      std::string _AssnsTag;
       
       Trigger _trigger;
 
@@ -98,14 +82,14 @@ private:
 
 
 novaddt::Tracktrigger::Tracktrigger(fhicl::ParameterSet const & p)
- : _TrackModuleTag   (p.get<std::string>("TrackModuleTag")),
-   _SliceModuleTag   (p.get<std::string>("SliceModuleTag")),
+ : _TrackModuleTag (p.get<std::string>("TrackModuleTag")),
+   _AssnsTag       (p.get<std::string>("AssnsTag")),
    _trigger(p)
 
 // Initialize member data here.
 {
-    produces< std::vector<novaddt::TriggerDecision>>();
-    produces< art::Assns<novaddt::TriggerDecision, novaddt::HitList> >();
+  //  produces< std::vector<novaddt::TriggerDecision>>();
+  //  produces< art::Assns<novaddt::TriggerDecision, novaddt::HitList> >();
 }
 
 bool novaddt::Tracktrigger::filter(art::Event & e)
@@ -116,15 +100,12 @@ bool novaddt::Tracktrigger::filter(art::Event & e)
     std::vector<Track> tracks;
 
     // Get from the event
-    art::Handle<std::vector<novaddt::Track3D>> trackHandle;
-    e.getByLabel(_TrackModuleLabel, _TrackInstanceLabel, trackHandle);
-    if (!trackHandle.isValid()) return false;
-
-    tracks.insert(tracks.end(), trackHandle->begin(), trackHandle->end());
+    auto trackHandle = e.getValidHandle<std::vector<novaddt::Track3D>>(_TrackModuleTag);
 
     // Connect track with HitList
-    art::FindOneP<novaddt::HitList> fohl(trackHandle, event, _TrackModuleLabel);
-    
+    //art::FindOneP<novaddt::HitList> fohl(trackHandle, e, _TrackModuleLabel);
+    art::FindOneP<novaddt::HitList> fohl(trackHandle, e, _AssnsTag);
+
     unsigned long hitSet_number = 0;
 
     for (size_t i=0; i<trackHandle->size(); ++i) {

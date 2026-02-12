@@ -1,3 +1,6 @@
+#include "fhiclcpp/ParameterSet.h"
+#include "DDTBaseDataProducts/DAQHit.h"
+#include "DDTBaseDataProducts/Track3D.h"
 #include <vector>
 #include <cmath>
 #include <string>
@@ -8,7 +11,7 @@ double DistanceToTrack(
     double y1, double y2,
     double x, double y);
 
-/*struct Hit {
+struct Hit {
     int hitSet_id;
     int plane;
     int cell;
@@ -16,6 +19,8 @@ double DistanceToTrack(
     long long tdc;
     int view;
     bool used;
+    Hit(const novaddt::DAQHit& h, int slice_id);
+
 };
 
 struct Track {
@@ -24,18 +29,10 @@ struct Track {
     double EndX, EndY, EndZ;
     int sliceID;
     int hitSet_id;
-};
-*/
+   
+    Track() = default;
+    Track(const novaddt::Track3D& t, int slice_id);
 
-// ParameterSet
-
-class ParameterSet {
-public:
-    ParameterSet(std::vector<std::pair<std::string,double>>& input);
-    double get(const std::string& key) const;
-
-private:
-    std::map<std::string,double> params;
 };
 
 // Track parameters
@@ -57,7 +54,14 @@ struct TrackParams {
 
 class ParameterCuts {
 public:
-    ParameterCuts(ParameterSet const& p);
+    ParameterCuts(double gaps_min, 
+                  double gaps_max,
+                  double length_min,
+                  double length_max,
+                  double max_gap,
+                  double epsilon,
+                  double total_hits_min,
+                  double total_hits_max);
 
     const std::vector<TrackParams>& operator()(
         const std::vector<Hit>& hits,
@@ -70,7 +74,15 @@ private:
 
     bool FilterTrack(const TrackParams& t);
 
-    ParameterSet const& pset;
+    double gaps_min;                                                         
+    double gaps_max;                                                         
+    double length_min;                                                       
+    double length_max;
+    double max_gap;                                                       
+    double epsilon;                                                          
+    double total_hits_min;                                                   
+    double total_hits_max;
+    
     std::vector<TrackParams> table;
 };
 
@@ -78,27 +90,37 @@ private:
 
 class Score {
 public:
-    Score(ParameterSet const& p);
+    Score(
+        double length_weight,
+        double hits_weight,
+        double gaps_weight,
+        double score_threshold);
 
     const std::vector<TrackParams>& operator()(
         const std::vector<TrackParams>& in);
 
 private:
-    ParameterSet const& pset;
+    double length_weight;
+    double hits_weight;
+    double gaps_weight;
+    double score_threshold;
     std::vector<TrackParams> table;
-};
+
+    };
 
 // AngleCut
 
 class AngleCut {
 public:
-    AngleCut(ParameterSet const& p);
+    AngleCut(double xz_cut, double yz_cut, double xy_cut);
 
     const std::vector<TrackParams>& operator()(
         const std::vector<TrackParams>& in);
 
 private:
-    ParameterSet const& pset;
+    double xz_cut;
+    double yz_cut;
+    double xy_cut;
     std::vector<TrackParams> table;
 };
 
@@ -124,7 +146,7 @@ using RestHits = std::vector<Hit>;
 
 class SeparateHitsWithTracksRestActivity {
 public:
-    SeparateHitsWithTracksRestActivity(ParameterSet const& p);
+    SeparateHitsWithTracksRestActivity(double epsilon);
 
     void Filter(
         const std::vector<Hit>& hits,
@@ -133,7 +155,7 @@ public:
     const RestHits& get_rest_hits() const;
 
 private:
-    ParameterSet const& pset;
+    double epsilon;
     RestHits rest_hits;
 };
 
@@ -141,14 +163,14 @@ private:
 
 class RestActivityCut {
 public:
-    RestActivityCut(ParameterSet const& p);
+    RestActivityCut(double min_hits);
 
     void Filter(const RestHits& hits);
 
     const RestHits& get_rest_hits() const;
 
 private:
-    ParameterSet const& pset;
+    double min_hits;
     RestHits filtered_hits;
 };
 
@@ -156,11 +178,12 @@ private:
 
 class Trigger {
 public:
-    Trigger(ParameterSet const& p);
+   // Trigger(ParameterSet const& p);
+    Trigger(const fhicl::ParameterSet& p);
 
     bool run_algorithm(
-        std::vector<Hit>& hits,
-        std::vector<Track>& tracks);
+         std::vector<Hit>& hits,
+         std::vector<Track>& tracks);
 
 private:
     ParameterCuts _ParametersCuts;

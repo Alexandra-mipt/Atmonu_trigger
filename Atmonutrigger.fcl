@@ -4,8 +4,8 @@ track_long_procedure:
 {
 # Module Configuration
     module_type:       "Tracktrigger"
-    TrackModuleTag:    "selectcontainedslice:ContainedTimeSpaceSlice"
-    SliceModuleTag:    "selectcontainedslice:ContainedTimeSpaceSlice"
+    TrackModuleTag:    "merge2dtracksthru:"
+    AssnsTag:          "merge2dtracksthru:toSlices"
 
 
 # Trigger Configuration
@@ -35,8 +35,8 @@ track_short_procedure:
 {
 # Module Configuration
     module_type:       "Tracktrigger"
-    TrackModuleTag:    "selectcontainedslice:ContainedTimeSpaceSlice"
-    SliceModuleTag:    "selectcontainedslice:ContainedTimeSpaceSlice"
+    TrackModuleTag:    "merge2dtracksthru:"
+    AssnsTag:          "merge2dtracksthru:toSlices"
  
 # Trigger Configuration
 
@@ -59,16 +59,16 @@ track_short_procedure:
     
 }
 
-non_track_procedure:
-{
+#non_track_procedure:
+#{
 # Module Configuration
-    module_type:
-    SliceModuleTag:    "notrackSlices"
+#    module_type:
+#    SliceModuleTag:    "notrackSlices"
 
 # Trigger Configuration
-
-                        model_filename:  "gb_model_cpp.txt"
-                        thr_opt:         0.63875492f
-}
+#
+#                        model_filename:  "gb_model_cpp.txt"
+#                        thr_opt:         0.63875492f
+#}
 
 END_PROLOG
