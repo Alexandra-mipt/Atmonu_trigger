@@ -1,10 +1,15 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "DDTBaseDataProducts/DAQHit.h"
 #include "DDTBaseDataProducts/Track3D.h"
+#include "art/Framework/Principal/Event.h"
 #include <vector>
 #include <cmath>
 #include <string>
 #include <map>
+#include <iomanip>
+#include <iostream>
+#include <algorithm>
+
 
 double DistanceToTrack(
     double x1, double x2,
@@ -63,7 +68,7 @@ public:
                   double total_hits_min,
                   double total_hits_max);
 
-    const std::vector<TrackParams>& operator()(
+        std::vector<TrackParams>& operator()(
         const std::vector<Hit>& hits,
         const std::vector<Track>& tracks);
 
@@ -96,14 +101,16 @@ public:
         double gaps_weight,
         double score_threshold);
 
-    const std::vector<TrackParams>& operator()(
-        const std::vector<TrackParams>& in);
+        const std::vector<TrackParams>& operator()(
+        std::vector<TrackParams>& in);
 
 private:
     double length_weight;
     double hits_weight;
     double gaps_weight;
     double score_threshold;
+    double Quantile(const std::vector<double>& sorted, double q);
+    double RobustNormalize(double value, double median, double q1, double q3);
     std::vector<TrackParams> table;
 
     };
@@ -132,7 +139,7 @@ public:
         const std::vector<Hit>& hits,
         const std::vector<TrackParams>& tracks);
 
-    const std::vector<Hit>& get_hits() const;
+    std::vector<Hit>& get_hits();
     const std::vector<Track>& get_tracks() const;
 
 private:
@@ -149,13 +156,19 @@ public:
     SeparateHitsWithTracksRestActivity(double epsilon);
 
     void Filter(
-        const std::vector<Hit>& hits,
+        std::vector<Hit>& hits,
         const std::vector<Track>& tracks);
 
-    const RestHits& get_rest_hits() const;
+    RestHits& get_rest_hits();
 
 private:
     double epsilon;
+    std::vector<int> FilterHitsAroundTrack(
+        const std::vector<Hit>& hits,
+        const Track& track
+        );
+
+    double HitDistanceToTrack(const Hit& h, const Track& t);
     RestHits rest_hits;
 };
 
@@ -183,7 +196,8 @@ public:
 
     bool run_algorithm(
          std::vector<Hit>& hits,
-         std::vector<Track>& tracks);
+         std::vector<Track>& tracks,
+         const art::Event& event);
 
 private:
     ParameterCuts _ParametersCuts;

@@ -14,6 +14,7 @@
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
 #include "canvas/Persistency/Common/FindOneP.h"
+#include "canvas/Persistency/Common/FindMany.h"
 #include "canvas/Persistency/Common/Assns.h"
 #include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
@@ -28,6 +29,7 @@
 #include <memory>
 #include <vector>
 #include <utility>
+#include <map>
 
 namespace novaddt {
   class Tracktrigger;
@@ -106,22 +108,56 @@ bool novaddt::Tracktrigger::filter(art::Event & e)
     //art::FindOneP<novaddt::HitList> fohl(trackHandle, e, _TrackModuleLabel);
     art::FindOneP<novaddt::HitList> fohl(trackHandle, e, _AssnsTag);
 
-    unsigned long hitSet_number = 0;
+   // Для отслеживания уникальных слайсов и их ID
+    std::map<art::Ptr<novaddt::HitList>, size_t> slice_map;
+    size_t next_slice_id = 0;
 
+// Проходим по всем трекам
+    for (size_t i = 0; i < trackHandle->size(); ++i) {
+    // Получаем указатель на HitList (слайс) для этого трека
+    art::Ptr<novaddt::HitList> hitListPtr = fohl.at(i);
+    
+    // Определяем slice_id для этого слайса
+    size_t slice_id;
+    auto it = slice_map.find(hitListPtr);
+    if (it == slice_map.end()) {
+        // Новый слайс - присваиваем новый ID и запоминаем
+        slice_id = next_slice_id++;
+        slice_map[hitListPtr] = slice_id;
+        
+        // Добавляем ВСЕ хиты из этого слайса (только один раз!)
+        for (const auto& h : *hitListPtr) {
+            hits.emplace_back(h, slice_id);
+        }
+        
+    } else {
+        // Уже известный слайс
+        slice_id = it->second;
+    }
+    
+    // Добавляем трек с правильным slice_id
+    tracks.emplace_back(trackHandle->at(i), slice_id); 
+}    
+ /*   
+    unsigned long hitSet_number = 0;
     for (size_t i=0; i<trackHandle->size(); ++i) {
         art::Ptr<novaddt::HitList> hitList = fohl.at(i);
- 
+         
         tracks.emplace_back(trackHandle->at(i), hitSet_number);
-
-       for (auto const& h : *hitList) 
+       
+       for (auto const& h : *hitList){ 
             hits.emplace_back(h, hitSet_number);
-        
-        hitSet_number++;
+       } 
+       
+       if (hitList->size()>0) {
+            hitSet_number++;
+            
+        }
     }
-
+*/
 
     // Run trigger algorithm
-    bool passed = _trigger.run_algorithm(hits, tracks);
+    bool passed = _trigger.run_algorithm(hits, tracks, e);
     _trigger_counts++;
 
     // Trigger decision
