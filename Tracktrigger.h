@@ -6,15 +6,14 @@
 #include <cmath>
 #include <string>
 #include <map>
+#include <unordered_set>
 #include <iomanip>
 #include <iostream>
 #include <algorithm>
 
+///////////////////////////////////////////////////////////////////////////////////////
 
-double DistanceToTrack(
-    double x1, double x2,
-    double y1, double y2,
-    double x, double y);
+double DistanceToTrack(double x1, double x2, double y1, double y2, double x, double y);
 
 struct Hit {
     int hitSet_id;
@@ -24,8 +23,8 @@ struct Hit {
     long long tdc;
     int view;
     bool used;
-    Hit(const novaddt::DAQHit& h, int slice_id);
 
+    Hit(const novaddt::DAQHit& h, int slice_id);
 };
 
 struct Track {
@@ -37,10 +36,7 @@ struct Track {
    
     Track() = default;
     Track(const novaddt::Track3D& t, int slice_id);
-
 };
-
-// Track parameters
 
 struct TrackParams {
     int sliceID;
@@ -55,27 +51,25 @@ struct TrackParams {
     Track track;
 };
 
-// ParameterCuts
+///////////////////////////////////////////////////////////////////////////////////////
 
 class ParameterCuts {
 public:
-    ParameterCuts(double gaps_min, 
-                  double gaps_max,
-                  double length_min,
-                  double length_max,
-                  double max_gap,
-                  double epsilon,
-                  double total_hits_min,
-                  double total_hits_max);
+    ParameterCuts(
+        double gaps_min,       double gaps_max,                                                         
+        double length_min,     double length_max,
+        double max_gap,        double epsilon,                                                          
+        double total_hits_min, double total_hits_max
+    );
 
-        std::vector<TrackParams>& operator()(
-        const std::vector<Hit>& hits,
-        const std::vector<Track>& tracks);
+    std::vector<TrackParams>& operator()(
+        const std::vector<Hit>& hits, const std::vector<Track>& tracks
+    );
 
 private:
     TrackParams CalculateTrackParams(
-        const std::vector<Hit>& hits,
-        const Track& track);
+        const std::vector<Hit>& hits, const Track& track
+    );
 
     bool FilterTrack(const TrackParams& t);
 
@@ -88,123 +82,121 @@ private:
     double total_hits_min;                                                   
     double total_hits_max;
     
-    std::vector<TrackParams> table;
+    std::vector<TrackParams> _paramTracks;
 };
 
-// Score
+///////////////////////////////////////////////////////////////////////////////////////
 
 class Score {
 public:
     Score(
-        double length_weight,
-        double hits_weight,
-        double gaps_weight,
-        double score_threshold);
+        double length_weight, double hits_weight,
+        double gaps_weight,   double score_threshold
+    );
 
-        const std::vector<TrackParams>& operator()(
-        std::vector<TrackParams>& in);
+    std::vector<TrackParams>& operator()(std::vector<TrackParams>& tracks);
 
 private:
+    void SelectBestTracks(std::vector<TrackParams>& tracks);
+
+    void ScoreTracks(std::vector<TrackParams>& tracks);
+
+    double Quantile(const std::vector<double>& sorted, double q);
+    
+    double RobustNormalize(double value, double median, double q1, double q3);
+
     double length_weight;
     double hits_weight;
     double gaps_weight;
     double score_threshold;
-    double Quantile(const std::vector<double>& sorted, double q);
-    double RobustNormalize(double value, double median, double q1, double q3);
-    std::vector<TrackParams> table;
+    std::vector<TrackParams> _scoreTracks;
+};
 
-    };
-
-// AngleCut
+///////////////////////////////////////////////////////////////////////////////////////
 
 class AngleCut {
 public:
     AngleCut(double xz_cut, double yz_cut, double xy_cut);
 
-    const std::vector<TrackParams>& operator()(
-        const std::vector<TrackParams>& in);
+    std::vector<TrackParams>& operator() (std::vector<TrackParams>& tracks);
 
 private:
     double xz_cut;
     double yz_cut;
     double xy_cut;
-    std::vector<TrackParams> table;
+    std::vector<TrackParams> _angleTracks;
 };
 
-// ChooseTrackHits
+///////////////////////////////////////////////////////////////////////////////////////
 
 class ChooseTrackHits {
 public:
-    void Filter(
-        const std::vector<Hit>& hits,
-        const std::vector<TrackParams>& tracks);
+    void operator()(
+        const std::vector<Hit>& hits, const std::vector<TrackParams>& tracks
+    );
 
-    std::vector<Hit>& get_hits();
-    const std::vector<Track>& get_tracks() const;
+    std::vector<Hit>& GetHits();
+
+    std::vector<Track>& GetTracks();
 
 private:
-    std::vector<Hit> selected_hits;
-    std::vector<Track> selected_tracks;
+    std::vector<Hit>   _selected_hits;
+    std::vector<Track> _selected_tracks;
 };
 
-// Rest activity
-
-using RestHits = std::vector<Hit>;
+///////////////////////////////////////////////////////////////////////////////////////
 
 class SeparateHitsWithTracksRestActivity {
 public:
     SeparateHitsWithTracksRestActivity(double epsilon);
 
-    void Filter(
-        std::vector<Hit>& hits,
-        const std::vector<Track>& tracks);
+    void operator()(
+        std::vector<Hit>& hits, std::vector<Track>& tracks
+    );
 
-    RestHits& get_rest_hits();
+    std::vector<Hit>& GetHits();
 
 private:
-    double epsilon;
     std::vector<int> FilterHitsAroundTrack(
-        const std::vector<Hit>& hits,
-        const Track& track
-        );
+        const std::vector<Hit>& hits, const Track& track
+    );
 
-    double HitDistanceToTrack(const Hit& h, const Track& t);
-    RestHits rest_hits;
+    double epsilon;
+    std::vector<Hit> _restHits;
 };
 
-// RestActivityCut
+///////////////////////////////////////////////////////////////////////////////////////
 
 class RestActivityCut {
 public:
     RestActivityCut(double min_hits);
 
-    void Filter(const RestHits& hits);
+    void operator()(std::vector<Hit>& hits);
 
-    const RestHits& get_rest_hits() const;
+    std::vector<Hit>& GetHits();
 
 private:
     double min_hits;
-    RestHits filtered_hits;
+    std::vector<Hit> _restHits;
 };
 
-// Trigger
+///////////////////////////////////////////////////////////////////////////////////////
 
 class Trigger {
 public:
-   // Trigger(ParameterSet const& p);
     Trigger(const fhicl::ParameterSet& p);
 
     bool run_algorithm(
-         std::vector<Hit>& hits,
-         std::vector<Track>& tracks,
-         const art::Event& event);
+        std::vector<Hit>& hits,std::vector<Track>& tracks, const art::Event& event
+    );
 
 private:
-    ParameterCuts _ParametersCuts;
-    Score _Score;
-    AngleCut _AngleCut;
-    ChooseTrackHits _ChooseTrackHits;
+    ParameterCuts                      _ParametersCuts;
+    Score                              _Score;
+    AngleCut                           _AngleCut;
+    ChooseTrackHits                    _ChooseTrackHits;
     SeparateHitsWithTracksRestActivity _SeparateHitsWithTracksRestActivity;
-    RestActivityCut _RestActivityCut;
+    RestActivityCut                    _RestActivityCut;
 };
 
+///////////////////////////////////////////////////////////////////////////////////////
