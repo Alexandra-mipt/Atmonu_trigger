@@ -23,8 +23,7 @@ Trigger::Trigger(fhicl::ParameterSet const& p):
         p.get<double>("xy_cut")),
     _SeparateHitsWithTracksRestActivity(
         p.get<double>("epsilon")),
-    _RestActivityCut(p.get<double>("min_hits")
-)
+    _RestActivityCut(p.get<double>("min_hits"))
 { }
 
 bool Trigger::run_algorithm(
@@ -32,6 +31,8 @@ bool Trigger::run_algorithm(
 )
 {
     std::cout << "\n=== Event ID: " << event.id().event() << " ===\n" << std::endl;
+    
+    std::cout << "sum_track: " << tracks.size() << "\n";
     
     auto& paramTracks = _ParametersCuts(hits, tracks);
 
@@ -70,6 +71,29 @@ double DistanceToTrack(double x1, double x2, double y1, double y2, double x, dou
     double dist_end = std::max({Lx - Rabs, -Lx, 0.0});
     return std::sqrt(Ly*Ly + dist_end*dist_end);
 }
+
+
+Hit::Hit(const novaddt::DAQHit& h, int slice_id):
+    hitSet_id(slice_id),
+    plane(h.Plane().val),
+    cell(h.Cell().val),
+    adc(h.ADC().val),
+    tdc(h.TDC().val),
+    view(h.View().val),
+    used(false)
+{ }
+
+
+Track::Track(const novaddt::Track3D& t, int slice_id):
+    fView(t.View()),
+    StartX(t.Start().X()),
+    StartY(t.Start().Y()),
+    StartZ(t.Start().Z()),
+    EndX(t.End().X()),
+    EndY(t.End().Y()),
+    EndZ(t.End().Z()),
+    sliceID(slice_id)
+{ }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 

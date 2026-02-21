@@ -64,7 +64,8 @@ physics:
     houghtracker:           @local::standard_houghtracker_numu
     merge2dtracksthru:      @local::standard_merge2dtracks_hough
     prescale:               @local::standard_sliceprescale
-    tracklong:             @local::track_long_procedure  
+    tracklong:              @local::track_long_procedure  
+    nontrackprocedure:      @local::non_track_procedure
     notrackSlices:    {
         module_type:"SelectNotrackSlices"
         slices_tag: "selectcontainedslice:ContainedTimeSpaceSlice"
@@ -82,8 +83,9 @@ physics:
     selectcontainedslice, 
     #houghtrackercontained, merge2dtracks, 
     houghtracker, merge2dtracksthru, 
-    #notrackSlices,
-    tracklong
+    notrackSlices,
+   # tracklong,
+    nontrackprocedure
 #    dcmfilter,
     ]
 

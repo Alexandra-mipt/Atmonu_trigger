@@ -23,7 +23,8 @@ struct Hit {
     long long tdc;
     int view;
     bool used;
-
+    
+    Hit() = default;
     Hit(const novaddt::DAQHit& h, int slice_id);
 };
 

@@ -1,5 +1,3 @@
-#include "Trigger.h"
-
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -14,11 +12,9 @@
 #include <fstream>
 #include <array>
 
-///////////////////////////////////////////////////////////////////////////////////////
+#include "Tracktrigger.h"
 
-inline uint64_t make_key(int eventID, int hitSet_id) {
-    return (uint64_t(uint32_t(eventID)) << 32) | uint32_t(hitSet_id);
-}
+///////////////////////////////////////////////////////////////////////////////////////
 
 struct Features {
     float n;
@@ -27,7 +23,6 @@ struct Features {
     float n_asym;
     float adc_asym;
     
-    int eventID;
     int hitSet_id;
 };
 
@@ -35,69 +30,67 @@ class PrepareClusterParameters {
 public:
     PrepareClusterParameters() = default;
 
-    void prepare_features(std::vector<Hit>& hits);
+    std::vector<Features>& PrepareFeatures(std::vector<Hit>& hits);
 
-    std::vector<Features> &get_features();
 private:
-    std::vector<Features> vFeatures;
+    std::vector<Features> _features;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-// Structure for tree node
+// Структура для узла дерева
 struct TreeNode {
-    int feature;           // Feature index for splitting
-    float threshold;      // Threshold value for splitting
-    float value;          // Value in leaf node
-    int left_child;        // Left child index (-1 for leaf)
-    int right_child;       // Right child index (-1 for leaf)
-    bool is_leaf;          // Leaf node flag
+    int feature;           // Индекс признака для разделения
+    float threshold;       // Порог для разделения
+    float value;           // Значение в листе
+    int left_child;        // Индекс левого потомка (-1 для листа)
+    int right_child;       // Индекс правого потомка (-1 для листа)
+    bool is_leaf;          // Флаг листа
 };
 
+// Структура для дерева
 struct Tree {
     std::vector<TreeNode> nodes;
     
     float predict(const std::vector<float>& features) const;
 };
 
+// Структура для хранения модели градиентного бустинга
 class GradientBoostingModel {
 public:
     GradientBoostingModel(const std::string& model_filename, float thr_opt);
 
-    void filter(std::vector<Hit>& hits, const std::vector<Features> vFeatures);
+    void operator()(std::vector<Hit>& hits, std::vector<Features>& features);
 private:
+    // Предсказание вероятностей для одного образца
     std::vector<float> predict_proba_one(const std::vector<float>& features) const;
     
+    // Предсказание вероятностей для матрицы
     std::vector<std::vector<float>> predict_proba(const std::vector<Features>& features) const;
     
+    // Предсказание классов
+    // std::vector<int> predict(const std::vector<std::vector<float>>& X) const;
 
-    float init_lo;                // Initial log odds
-    float learning_rate;          // Learning rate
-    std::vector<Tree> trees;      // Trees
-    float thr_opt;                // Optimal threshold for filtering
+    float init_lo;                // Начальный логарифм шансов
+    float learning_rate;          // Скорость обучения
+    std::vector<Tree> trees;      // Деревья
+    float thr_opt;                // Оптимальный порог для фильтрации
 };
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
 class TriggerNonTrack {
 public:
-    TriggerNonTrack(
-        const std::string& model_filename, float thr_opt
-    );
+    TriggerNonTrack(fhicl::ParameterSet const& p);
     
-    void fPrepareClusterParameters(std::vector<Hit>& hits);
-    
-    std::vector<Features> &GetPrepareClusterParameters();
-
-    void fGradientBoostingModel(
-        std::vector<Hit>& hits,
-        const std::vector<Features>& vFeatures
-    );
+    bool run_algorithm(std::vector<Hit>& hits, const art::Event& event);
 
 private:
     std::string model_filename;
     PrepareClusterParameters _PrepareClusterParameters;
-    GradientBoostingModel _GradientBoostingModel;
+    GradientBoostingModel    _GradientBoostingModel;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
+

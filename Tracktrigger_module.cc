@@ -20,11 +20,12 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "Tracktrigger.h"
 #include "DDTBaseDataProducts/Track3D.h"
 #include "DDTBaseDataProducts/HitList.h"
 #include "DDTBaseDataProducts/DAQHit.h"
 #include "DDTBaseDataProducts/TriggerDecision.h"
+
+#include "Tracktrigger.h"
 
 #include <memory>
 #include <vector>
@@ -34,30 +35,6 @@
 namespace novaddt {
   class Tracktrigger;
 }
-
-
-Hit::Hit(const novaddt::DAQHit& h, int slice_id):
-    hitSet_id(slice_id),
-    plane(h.Plane().val),
-    cell(h.Cell().val),
-    adc(h.ADC().val),
-    tdc(h.TDC().val),
-    view(h.View().val),
-    used(false)
-    {}
-
-
-Track::Track(const novaddt::Track3D& t, int slice_id):
-    fView(t.View()),
-    StartX(t.Start().X()),
-    StartY(t.Start().Y()),
-    StartZ(t.Start().Z()),
-    EndX(t.End().X()),
-    EndY(t.End().Y()),
-    EndZ(t.End().Z()),
-    sliceID(slice_id)
-    { }
-
 
 class novaddt::Tracktrigger : public art::EDFilter {
 public:
@@ -84,11 +61,9 @@ private:
 
 
 novaddt::Tracktrigger::Tracktrigger(fhicl::ParameterSet const & p)
- : _TrackModuleTag (p.get<std::string>("TrackModuleTag")),
-   _AssnsTag       (p.get<std::string>("AssnsTag")),
+ : _TrackModuleTag(p.get<std::string>("TrackModuleTag")),
+   _AssnsTag(p.get<std::string>("AssnsTag")),
    _trigger(p)
-
-// Initialize member data here.
 {
   //  produces< std::vector<novaddt::TriggerDecision>>();
   //  produces< art::Assns<novaddt::TriggerDecision, novaddt::HitList> >();
@@ -96,7 +71,6 @@ novaddt::Tracktrigger::Tracktrigger(fhicl::ParameterSet const & p)
 
 bool novaddt::Tracktrigger::filter(art::Event & e)
 {
-  // Implementation of required member function here.
     // Tracks and Hits
     std::vector<Hit> hits;
     std::vector<Track> tracks;
@@ -108,36 +82,36 @@ bool novaddt::Tracktrigger::filter(art::Event & e)
     //art::FindOneP<novaddt::HitList> fohl(trackHandle, e, _TrackModuleLabel);
     art::FindOneP<novaddt::HitList> fohl(trackHandle, e, _AssnsTag);
 
-   // Для отслеживания уникальных слайсов и их ID
+    // Для отслеживания уникальных слайсов и их ID
     std::map<art::Ptr<novaddt::HitList>, size_t> slice_map;
     size_t next_slice_id = 0;
 
-// Проходим по всем трекам
+    // Проходим по всем трекам
     for (size_t i = 0; i < trackHandle->size(); ++i) {
-    // Получаем указатель на HitList (слайс) для этого трека
-    art::Ptr<novaddt::HitList> hitListPtr = fohl.at(i);
-    
-    // Определяем slice_id для этого слайса
-    size_t slice_id;
-    auto it = slice_map.find(hitListPtr);
-    if (it == slice_map.end()) {
-        // Новый слайс - присваиваем новый ID и запоминаем
-        slice_id = next_slice_id++;
-        slice_map[hitListPtr] = slice_id;
+        // Получаем указатель на HitList (слайс) для этого трека
+        art::Ptr<novaddt::HitList> hitListPtr = fohl.at(i);
         
-        // Добавляем ВСЕ хиты из этого слайса (только один раз!)
-        for (const auto& h : *hitListPtr) {
-            hits.emplace_back(h, slice_id);
+        // Определяем slice_id для этого слайса
+        size_t slice_id;
+        auto it = slice_map.find(hitListPtr);
+        if (it == slice_map.end()) {
+            // Новый слайс - присваиваем новый ID и запоминаем
+            slice_id = next_slice_id++;
+            slice_map[hitListPtr] = slice_id;
+
+            // Добавляем ВСЕ хиты из этого слайса (только один раз!)
+            for (const auto& h : *hitListPtr) {
+                hits.emplace_back(h, slice_id);
+            }
+
+        } else {
+            // Уже известный слайс
+            slice_id = it->second;
         }
-        
-    } else {
-        // Уже известный слайс
-        slice_id = it->second;
-    }
-    
-    // Добавляем трек с правильным slice_id
-    tracks.emplace_back(trackHandle->at(i), slice_id); 
-}    
+
+        // Добавляем трек с правильным slice_id
+        tracks.emplace_back(trackHandle->at(i), slice_id); 
+    }    
  /*   
     unsigned long hitSet_number = 0;
     for (size_t i=0; i<trackHandle->size(); ++i) {
@@ -161,8 +135,6 @@ bool novaddt::Tracktrigger::filter(art::Event & e)
     _trigger_counts++;
 
     // Trigger decision
-
-
     return passed;
 }
 

@@ -17,12 +17,16 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
+#include "DDTBaseDataProducts/HitList.h"
+#include "DDTBaseDataProducts/DAQHit.h"
+
+#include "Nontracktrigger.h"
+
 #include <memory>
 
 namespace novaddt {
   class Nontracktrigger;
 }
-
 
 class novaddt::Nontracktrigger : public art::EDFilter {
 public:
@@ -40,22 +44,36 @@ public:
   bool filter(art::Event & e) override;
 
 private:
-
-  // Declare member data here.
-
+  std::string _SliceModuleTag;
+  TriggerNonTrack _trigger;
+  unsigned int _trigger_counts = 0;
 };
 
 
 novaddt::Nontracktrigger::Nontracktrigger(fhicl::ParameterSet const & p)
-// :
-// Initialize member data here.
+  : _SliceModuleTag(p.get<std::string>("SliceModuleTag")),
+    _trigger(p)
 {
   // Call appropriate produces<>() functions here.
 }
 
 bool novaddt::Nontracktrigger::filter(art::Event & e)
 {
-  // Implementation of required member function here.
+  std::vector<Hit> hits;
+  
+  auto hitHandle = e.getValidHandle<std::vector<std::vector<novaddt::DAQHit>>>(_SliceModuleTag);
+
+  for (size_t hitSet_id = 0; hitSet_id < hitHandle->size(); ++hitSet_id) {
+    for (const auto& h : hitHandle->at(hitSet_id)) {
+      hits.emplace_back(h, hitSet_id);
+    }
+  }
+
+  bool passed = _trigger.run_algorithm(hits, e);
+  std::cout<<"LOOOOK"<<passed<<"\n";
+  _trigger_counts++;
+  
+  return passed;
 }
 
 DEFINE_ART_MODULE(novaddt::Nontracktrigger)

@@ -64,7 +64,6 @@ bool novaddt::SelectNotrackSlices::filter(art::Event & e)
   art::FindMany<novaddt::Track3D> fm_tracks_in_slice(slices, e, fAssnsTag); //// assosiations
   //prepare resulting vector
   auto result=std::make_unique<std::vector<novaddt::HitList>>();
-  
   for (size_t slice_id=0; slice_id<fm_tracks_in_slice.size(); slice_id++){
     const auto & tracks = fm_tracks_in_slice.at(slice_id);
     novaddt::HitList product = slices->at(slice_id);
@@ -72,6 +71,7 @@ bool novaddt::SelectNotrackSlices::filter(art::Event & e)
   }
   mf::LogDebug("SelectNotrackSlices")<<" selected "<<result->size()<<" slices";
   e.put(std::move(result));
+  return !slices->empty();
 }
 
 DEFINE_ART_MODULE(novaddt::SelectNotrackSlices)

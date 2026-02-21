@@ -59,16 +59,16 @@ track_short_procedure:
     
 }
 
-#non_track_procedure:
-#{
+non_track_procedure:
+{
 # Module Configuration
-#    module_type:
-#    SliceModuleTag:    "notrackSlices"
+    module_type:       "Nontracktrigger"
+    SliceModuleTag:    "notrackSlices"
 
 # Trigger Configuration
-#
-#                        model_filename:  "gb_model_cpp.txt"
-#                        thr_opt:         0.63875492f
-#}
+
+                        model_filename:  "gb_model_cpp.txt"
+                        thr_opt:         0.63875492
+}
 
 END_PROLOG
