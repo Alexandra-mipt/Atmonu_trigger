@@ -86,6 +86,7 @@ public:
     
     bool run_algorithm(std::vector<Hit>& hits, const art::Event& event);
 
+    size_t sum=0;
 private:
     std::string model_filename;
     PrepareClusterParameters _PrepareClusterParameters;

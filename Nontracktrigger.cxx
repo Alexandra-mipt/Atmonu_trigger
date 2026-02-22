@@ -16,7 +16,7 @@ bool TriggerNonTrack::run_algorithm(std::vector<Hit>& hits, const art::Event& ev
     std::cout << "\n=== Event ID: " << event.id().event() << " ===\n" << std::endl;
 
     std::cout << "sum: " << hits.size()  << "\n";
-
+    sum+=hits.size();
     auto& features = _PrepareClusterParameters.PrepareFeatures(hits);
 
     std::cout << "HITS: " << hits.size()   << "\n";    
@@ -216,13 +216,14 @@ void GradientBoostingModel::operator()(std::vector<Hit>& hits, std::vector<Featu
     
     for (size_t i = 0; i < features.size(); ++i) {
         if (proba[i][1] > thr_opt) { // 0.63875492f
-            Hit h;
-            h.hitSet_id = features[i].hitSet_id;
-            out.push_back(h);
+            out = std::move(hits);
+            //Hit h;
+            //h.hitSet_id = features[i].hitSet_id;
+            //out.push_back(h);
         }
     }
 
-    hits = out;
+    hits = std::move(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

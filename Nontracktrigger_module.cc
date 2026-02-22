@@ -72,7 +72,8 @@ bool novaddt::Nontracktrigger::filter(art::Event & e)
   bool passed = _trigger.run_algorithm(hits, e);
   std::cout<<"LOOOOK"<<passed<<"\n";
   _trigger_counts++;
-  
+  std::cout<<"cumsum: " << _trigger.sum << "\n";
+
   return passed;
 }
 
