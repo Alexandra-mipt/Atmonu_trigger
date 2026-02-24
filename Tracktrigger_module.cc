@@ -49,13 +49,13 @@ public:
   bool filter(art::Event & e) override;
 
 private:
-
-      std::string _TrackModuleTag;
-      std::string _AssnsTag;
+  std::string _TrackModuleTag;
+  std::string _AssnsTag;
       
-      Trigger _trigger;
+  Trigger _trigger;
 
-      unsigned int _trigger_counts = 0;
+  unsigned int _prescale;
+  unsigned int _trigger_counts;
 
 };
 
@@ -63,14 +63,19 @@ private:
 novaddt::Tracktrigger::Tracktrigger(fhicl::ParameterSet const & p)
  : _TrackModuleTag(p.get<std::string>("TrackModuleTag")),
    _AssnsTag(p.get<std::string>("AssnsTag")),
-   _trigger(p)
+   _trigger(p),
+   _prescale(p.get<unsigned>("prescale")),
+   _trigger_counts(0)
 {
-  //  produces< std::vector<novaddt::TriggerDecision>>();
+   std::cerr << "PROD1\n";
+   produces< std::vector<novaddt::TriggerDecision>>();
+   std::cerr << "PROD1\n";
   //  produces< art::Assns<novaddt::TriggerDecision, novaddt::HitList> >();
 }
 
 bool novaddt::Tracktrigger::filter(art::Event & e)
 {
+    std::cerr << "PROD2\n";
     // Tracks and Hits
     std::vector<Hit> hits;
     std::vector<Track> tracks;
@@ -112,28 +117,32 @@ bool novaddt::Tracktrigger::filter(art::Event & e)
         // Добавляем трек с правильным slice_id
         tracks.emplace_back(trackHandle->at(i), slice_id); 
     }    
- /*   
-    unsigned long hitSet_number = 0;
-    for (size_t i=0; i<trackHandle->size(); ++i) {
-        art::Ptr<novaddt::HitList> hitList = fohl.at(i);
-         
-        tracks.emplace_back(trackHandle->at(i), hitSet_number);
-       
-       for (auto const& h : *hitList){ 
-            hits.emplace_back(h, hitSet_number);
-       } 
-       
-       if (hitList->size()>0) {
-            hitSet_number++;
-            
-        }
-    }
-*/
 
-    // Run trigger algorithm
+//  std::unique_ptr<std::vector<novaddt::TriggerDecision> > 
+  //  trigger_decisions(new std::vector<novaddt::TriggerDecision>());
+  
+    std::cout << "Look1!!\n\n";
+    std::unique_ptr<std::vector<novaddt::TriggerDecision>> trigger_decisions(new std::vector<novaddt::TriggerDecision>);
+
+  // Run trigger algorithm
     bool passed = _trigger.run_algorithm(hits, tracks, e);
-    _trigger_counts++;
 
+
+    std::cout << "Look22!!\n\n";
+
+  if (passed) {
+    for (auto td : _trigger.TriggerDecisions()) {
+      _trigger_counts++;
+
+      if (_trigger_counts % _prescale) {
+        td.setPrescale(_prescale);
+        trigger_decisions->push_back(td);
+      }
+    }
+  }
+    std::cout << "PUT1??\n"; 
+    e.put(std::move(trigger_decisions));
+    std::cout << "PUT2??\n"; 
     // Trigger decision
     return passed;
 }
