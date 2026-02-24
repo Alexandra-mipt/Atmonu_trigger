@@ -1,0 +1,257 @@
+# Produced from 'fhicl-dump' using:
+#   Input  : DDTAtmoNu_job.fcl
+#   Policy : cet::filepath_maker
+#   Path   : "FHICL_FILE_PATH"
+
+daq: {
+   generator: "NovaFragmentReader"
+   n_events: -1
+   queue_depth: 2
+   resume_after_overwrite: true
+   resume_after_timeout: true
+   run_number: 1
+   waiting_time: 1
+}
+outputs: {
+   out: {
+      fastCloning: false
+      fileName: "datahough.artdaq.root"
+      module_type: "RootOutput"
+   }
+}
+physics: {
+   analyzers: {}
+   atmonu: [
+      "hitProducer",
+      "tdcsort",
+      "singletonrejection",
+      "timeslice",
+      "removenoise",
+      "spaceslice",
+      "removespatialnoise",
+      "selectcontainedslice",
+      "houghtracker",
+      "merge2dtracksthru",
+      "notrackSlices",
+      "tracklong"
+   ]
+   end_paths: [
+      "output"
+   ]
+   filters: {
+      houghtracker: {
+         max_cell_separation: 50
+         max_plane_separation: 30
+         max_tdc_separation: 50
+         maximum_hits_per_slice: 1200
+         minimum_hits_per_track: 5
+         minimum_points_to_tag: 5
+         module_type: "HoughTracker"
+         parallel: false
+         slice_instance: "ContainedTimeSpaceSlice"
+         slice_label: "selectcontainedslice"
+         velocity_cut: 4
+      }
+      houghtrackercontained: {
+         max_cell_separation: 30
+         max_plane_separation: 30
+         max_tdc_separation: 50
+         maximum_hits_per_slice: 1200
+         minimum_hits_per_track: 5
+         minimum_points_to_tag: 5
+         module_type: "HoughTracker"
+         parallel: false
+         slice_instance: "ContainedTimeSpaceSlice"
+         slice_label: "containedslice"
+         velocity_cut: 4
+      }
+      merge2dtracks: {
+         AlwaysMergeMin: false
+         AmbiguityMetric: "nhits"
+         MatchingMetric: "dZ"
+         MetricThreshold: 10
+         MinHits: 0
+         SimpleTwoViewMode: false
+         SliceInstanceLabel: "ContainedTimeSpaceSlice"
+         SliceModuleLabel: "containedslice"
+         TrackInstanceLabel: ""
+         TrackModuleLabel: "houghtrackercontained"
+         TrackToSliceInstanceLabel: "toSlices"
+         module_type: "Merge2DTracks"
+      }
+      merge2dtracksthru: {
+         AlwaysMergeMin: false
+         AmbiguityMetric: "nhits"
+         MatchingMetric: "dZ"
+         MetricThreshold: 10
+         MinHits: 60
+         SimpleTwoViewMode: false
+         SliceInstanceLabel: "ContainedTimeSpaceSlice"
+         SliceModuleLabel: "selectcontainedslice"
+         TrackInstanceLabel: ""
+         TrackModuleLabel: "houghtracker"
+         TrackToSliceInstanceLabel: "toSlices"
+         module_type: "Merge2DTracks"
+      }
+      multiplet: {
+         ApplyDistCorrection: true
+         ApplyTimingCorrection: true
+         InputTag: "tdcsort:TDCSortedHits"
+         Verbose: false
+         module_type: "Multiplet"
+         slicer: {
+            MaxCellSep: 2
+            MaxDT: {
+               xx: 4
+               xy: 2
+            }
+            MaxPlaneSep: 1
+            MaxSliceSize: 20
+            MaxTDCSep: 7
+            MinSliceSize: 2
+         }
+      }
+      nontrackprocedure: {
+         SliceModuleTag: "notrackSlices"
+         model_filename: "gb_model_cpp.txt"
+         module_type: "Nontracktrigger"
+         prescale: 1
+         thr_opt: 6.3875492e-1
+      }
+      notrackSlices: {
+         assns_tag: "merge2dtracksthru:toSlices"
+         module_type: "SelectNotrackSlices"
+         slices_tag: "selectcontainedslice:ContainedTimeSpaceSlice"
+      }
+      prescale: {
+         mode: "fixed"
+         module_type: "SlicePrescale"
+         prescale: 1
+         slice_instance: "TimeSpaceSlice"
+         slice_label: "spaceslice"
+      }
+      removenoise: {
+         MinHits: 10
+         gh_label: "timeslice"
+         instance: "TDCSlice"
+         module_type: "RemoveNoise"
+      }
+      removespatialnoise: {
+         InputInstance: "TimeSpaceSlice"
+         InputLabel: "spaceslice"
+         MaxXYGap: 10
+         MinXYHits: 3
+         module_type: "RemoveSpatialNoise"
+      }
+      selectcontainedslice: {
+         Autoconfigure: false
+         AutoconfigureInterval: 1000
+         AutoconfigureMaxZOffset: 3
+         AutoconfigureMinZOffset: 3
+         AutoconfigureSliceInstanceLabel: "TDCSortedHits"
+         AutoconfigureSliceModuleLabel: "tdcsort"
+         Detector: "FD"
+         SecondaryZmax: 896
+         SecondaryZmin: 0
+         SliceInstanceLabel: "CleanTimeSpaceSlice"
+         SliceModuleLabel: "removespatialnoise"
+         UseSecondaryZCuts: false
+         Verbose: false
+         Xmax: 379
+         Xmin: 5
+         Ymax: 377
+         Ymin: 7
+         Zmax: 886
+         Zmin: 10
+         module_type: "ContainedSlice"
+      }
+      singletonrejection: {
+         InputInstance: "TDCSortedHits"
+         InputLabel: "tdcsort"
+         MinCellSep: 4
+         MinPlaneSep: 5
+         MinTDCSep: 30
+         module_type: "SingletonRejection"
+      }
+      spaceslice: {
+         MaxZGap: 10
+         MinHits: 10
+         gh_label: "removenoise"
+         instance: "TDCSliceClean"
+         module_type: "SpaceSlice"
+      }
+      tdcsort: {
+         hits_instance: "AllHits"
+         hits_label: "hitProducer"
+         module_type: "SortByTDC"
+      }
+      timeslice: {
+         MinHits: 10
+         TimeWindow: 70
+         hits_label: "singletonrejection"
+         instance: "SingletonRejected"
+         module_type: "TimeSlice"
+      }
+      tracklong: {
+         AssnsTag: "merge2dtracksthru:toSlices"
+         TrackModuleTag: "merge2dtracksthru:"
+         epsilon: 1.6
+         gaps_max: 1e9
+         gaps_min: 0
+         gaps_weight: 8e-1
+         hits_weight: 1e-1
+         is_long_procedure: true
+         length_max: 1e9
+         length_min: 40
+         length_weight: 5e-1
+         max_gap: 6
+         min_hits: 11
+         module_type: "Tracktrigger"
+         prescale: 1
+         score_threshold: -3e-1
+         total_hits_max: 193
+         total_hits_min: 26
+         xy_cut: 0
+         xz_cut: 1.08e1
+         yz_cut: 18
+      }
+   }
+   output: [
+      "out"
+   ]
+   producers: {
+      hitProducer: {
+         expr: "daqhit"
+         label: "AllHits"
+         module_type: "HitSubtract"
+      }
+      track: {
+         DHitGood: 6
+         SortOutputHits: true
+         assn_to_slice_instance: "toSlices"
+         module_type: "TrackFit"
+         slice_instance: "TimeSpaceSlice"
+         slice_label: "spaceslice"
+      }
+   }
+}
+process_name: "DDTOffline"
+services: {
+   TFileService: {
+      closeFileFast: false
+      fileName: "triggers.tree.root"
+   }
+   WaveformProcessor: {
+      DoHighADCFits: true
+      FallTime: 14
+      RiseTime: 9.2e-1
+      SampleTime: 500
+      ShapeTableFilename: "DDTCore/adc_shape_fit_table_fd_460_7000_spar.root"
+      UseMulti: true
+      UseMulti4ADC: false
+   }
+}
+source: {
+   fileNames: "nil"
+   module_type: "RootInput"
+}

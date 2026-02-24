@@ -1,3 +1,6 @@
+
+//#include "TriggerDefines.h"
+
 #include "fhiclcpp/ParameterSet.h"
 #include "DDTBaseDataProducts/DAQHit.h"
 #include "DDTBaseDataProducts/Track3D.h"
@@ -11,6 +14,7 @@
 #include <iostream>
 #include <algorithm>
 
+#include "DDTBaseDataProducts/TriggerDecision.h"
 ///////////////////////////////////////////////////////////////////////////////////////
 
 double DistanceToTrack(double x1, double x2, double y1, double y2, double x, double y);
@@ -183,6 +187,22 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
+
+struct Counter {
+
+    int _tcumsum;
+    int _scumsum;
+    int _acumsum;
+    int _ccumsum;
+    int _sepcumsum;
+    int _rcumsum;
+
+
+    Counter(): _tcumsum(0), _scumsum(0), _acumsum(0), _ccumsum(0), _sepcumsum(0), _rcumsum(0)
+    { }
+};
+
+
 class Trigger {
 public:
     Trigger(const fhicl::ParameterSet& p);
@@ -191,6 +211,8 @@ public:
         std::vector<Hit>& hits,std::vector<Track>& tracks, const art::Event& event
     );
 
+    std::vector<novaddt::TriggerDecision> TriggerDecisions() const;
+
 private:
     ParameterCuts                      _ParametersCuts;
     Score                              _Score;
@@ -198,6 +220,7 @@ private:
     ChooseTrackHits                    _ChooseTrackHits;
     SeparateHitsWithTracksRestActivity _SeparateHitsWithTracksRestActivity;
     RestActivityCut                    _RestActivityCut;
+    std::vector<novaddt::TriggerDecision> _triggerDecisions;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////

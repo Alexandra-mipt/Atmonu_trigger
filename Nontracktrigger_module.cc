@@ -7,6 +7,7 @@
 // from cetlib version v3_06_00.
 ////////////////////////////////////////////////////////////////////////
 
+
 #include "art/Framework/Core/EDFilter.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
@@ -46,20 +47,57 @@ public:
 private:
   std::string _SliceModuleTag;
   TriggerNonTrack _trigger;
-  unsigned int _trigger_counts = 0;
+  unsigned int _prescale;
+  unsigned int _trigger_counts;
 };
-
 
 novaddt::Nontracktrigger::Nontracktrigger(fhicl::ParameterSet const & p)
   : _SliceModuleTag(p.get<std::string>("SliceModuleTag")),
-    _trigger(p)
+    _trigger(p), 
+    _prescale(p.get<unsigned>("prescale")),
+    _trigger_counts(0)
 {
+  
+  produces<std::vector<novaddt::TriggerDecision> >();
+
   // Call appropriate produces<>() functions here.
 }
 
 bool novaddt::Nontracktrigger::filter(art::Event & e)
 {
   std::vector<Hit> hits;
+
+  std::unique_ptr<std::vector<novaddt::TriggerDecision> > 
+    trigger_decisions(new std::vector<novaddt::TriggerDecision>());
+  
+  auto hitHandle = e.getValidHandle<std::vector<std::vector<novaddt::DAQHit>>>(_SliceModuleTag);
+
+  for (size_t hitSet_id = 0; hitSet_id < hitHandle->size(); ++hitSet_id) {
+    for (const auto& h : hitHandle->at(hitSet_id)) {
+      hits.emplace_back(h, hitSet_id);
+    }
+  }
+
+  bool passed = _trigger.run_algorithm(hits, e);
+
+  if (passed) {
+    for (auto td : _trigger.TriggerDecisions()) {
+      _trigger_counts++;
+
+      if (_trigger_counts % _prescale) {
+        td.setPrescale(_prescale);
+        trigger_decisions->push_back(td);
+      }
+    }
+  }
+
+  e.put(std::move(trigger_decisions));
+  return passed;
+}
+
+
+/*
+std::vector<Hit> hits;
   
   auto hitHandle = e.getValidHandle<std::vector<std::vector<novaddt::DAQHit>>>(_SliceModuleTag);
 
@@ -75,6 +113,7 @@ bool novaddt::Nontracktrigger::filter(art::Event & e)
   std::cout<<"cumsum: " << _trigger.sum << "\n";
 
   return passed;
-}
+*/
+//}
 
 DEFINE_ART_MODULE(novaddt::Nontracktrigger)

@@ -29,6 +29,8 @@ track_long_procedure:
                          xy_cut:          0.0
 
                          min_hits:        11
+                         
+                         prescale:        1
 }
 
 track_short_procedure:
@@ -69,6 +71,8 @@ non_track_procedure:
 
                         model_filename:  "gb_model_cpp.txt"
                         thr_opt:         0.63875492
+                        
+                        prescale:        1
 }
 
 END_PROLOG

@@ -1,6 +1,6 @@
 #include "Tracktrigger.h"
-
 ///////////////////////////////////////////////////////////////////////////////////////
+
 
 Trigger::Trigger(fhicl::ParameterSet const& p):
     _ParametersCuts(
@@ -24,6 +24,7 @@ Trigger::Trigger(fhicl::ParameterSet const& p):
     _SeparateHitsWithTracksRestActivity(
         p.get<double>("epsilon")),
     _RestActivityCut(p.get<double>("min_hits"))
+    //_counter()
 { }
 
 bool Trigger::run_algorithm(
@@ -32,24 +33,96 @@ bool Trigger::run_algorithm(
 {
     std::cout << "\n=== Event ID: " << event.id().event() << " ===\n" << std::endl;
     
-    std::cout << "sum_track: " << tracks.size() << "\n";
-    
+    //hcumsum += hits.size();
+    //std::cout << "hcumsum: " << hcumsum << "\n";
+    static int tcumsum = 0;
+    tcumsum += tracks.size();
+    std::cout << "tcumsum: " << tcumsum << "\n";
+   
     auto& paramTracks = _ParametersCuts(hits, tracks);
 
+    static int pcumsum = 0;
+    pcumsum += paramTracks.size();
+    std::cout << "pcumsum: " << pcumsum << "\n";
+    
     auto& scoreTracks = _Score(paramTracks);
-        
+
+    static int scumsum = 0;
+    scumsum += scoreTracks.size();
+    std::cout << "scumsum: " << scumsum << "\n";
+
     auto& angleTracks = _AngleCut(scoreTracks);
-        
+    
+    static int acumsum = 0;
+    acumsum += angleTracks.size();
+    std::cout << "acumsum: " << acumsum << "\n";
+
     _ChooseTrackHits(hits, angleTracks);
-        
+    
     auto& filteredHits   = _ChooseTrackHits.GetHits();
     auto& filteredTracks = _ChooseTrackHits.GetTracks();
-    _SeparateHitsWithTracksRestActivity(filteredHits, filteredTracks);
     
+    static int chcumsum = 0;
+    chcumsum += filteredHits.size();
+    std::cout << "chcumsum: " << chcumsum << "\n";
+    
+    _SeparateHitsWithTracksRestActivity(filteredHits, filteredTracks);
+ 
+    static int sepcumsum = 0;
+    sepcumsum += filteredHits.size();
+    std::cout << "sepcumsum: " << sepcumsum << "\n";
+
     auto& restHits = _SeparateHitsWithTracksRestActivity.GetHits();
     _RestActivityCut(restHits);
 
+    static int rcumsum = 0;
+    rcumsum += restHits.size();
+    std::cout << "rcumsum: " << rcumsum << "\n";
+
+    
+    std::unordered_map<int, std::pair<unsigned int, unsigned int>> grouped;
+
+    for (const auto& h : restHits) {
+        auto result = grouped.emplace(
+            h.hitSet_id,
+            std::make_pair(h.tdc, h.tdc)
+        );
+
+        if (!result.second) {
+            auto& mm = result.first->second;
+
+            if (h.tdc < mm.first)
+                mm.first = h.tdc;
+
+            if (h.tdc > mm.second)
+                mm.second = h.tdc;
+        }
+    }
+
+    for (const auto& kv : grouped) {
+        auto min_tdc = kv.second.first  - 300u;
+        auto max_tdc = kv.second.second + 300u;
+
+        std::cout <<"TDC"<<"\n";
+        std::cout << "min: " << min_tdc <<"\n"<< "max: " << max_tdc << "\n";
+
+
+        _triggerDecisions.emplace_back(
+            min_tdc,
+            max_tdc - min_tdc,
+            daqdataformats::trigID::TRIG_ID_DATA_ATMNU,
+            1
+        );
+    }
+
+
     return !_RestActivityCut.GetHits().empty();
+}
+
+
+std::vector<novaddt::TriggerDecision> Trigger::TriggerDecisions() const
+{
+    return _triggerDecisions;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -102,7 +175,7 @@ ParameterCuts::ParameterCuts(
     double length_min,     double length_max,
     double max_gap,        double epsilon,                                                          
     double total_hits_min, double total_hits_max
-):
+):  
     gaps_min(gaps_min),             gaps_max(gaps_max),
     length_min(length_min),         length_max(length_max),
     max_gap(max_gap),               epsilon(epsilon),

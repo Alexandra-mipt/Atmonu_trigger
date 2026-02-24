@@ -67,15 +67,12 @@ novaddt::Tracktrigger::Tracktrigger(fhicl::ParameterSet const & p)
    _prescale(p.get<unsigned>("prescale")),
    _trigger_counts(0)
 {
-   std::cerr << "PROD1\n";
    produces< std::vector<novaddt::TriggerDecision>>();
-   std::cerr << "PROD1\n";
   //  produces< art::Assns<novaddt::TriggerDecision, novaddt::HitList> >();
 }
 
 bool novaddt::Tracktrigger::filter(art::Event & e)
 {
-    std::cerr << "PROD2\n";
     // Tracks and Hits
     std::vector<Hit> hits;
     std::vector<Track> tracks;
@@ -121,14 +118,11 @@ bool novaddt::Tracktrigger::filter(art::Event & e)
 //  std::unique_ptr<std::vector<novaddt::TriggerDecision> > 
   //  trigger_decisions(new std::vector<novaddt::TriggerDecision>());
   
-    std::cout << "Look1!!\n\n";
     std::unique_ptr<std::vector<novaddt::TriggerDecision>> trigger_decisions(new std::vector<novaddt::TriggerDecision>);
 
   // Run trigger algorithm
     bool passed = _trigger.run_algorithm(hits, tracks, e);
 
-
-    std::cout << "Look22!!\n\n";
 
   if (passed) {
     for (auto td : _trigger.TriggerDecisions()) {
@@ -140,9 +134,7 @@ bool novaddt::Tracktrigger::filter(art::Event & e)
       }
     }
   }
-    std::cout << "PUT1??\n"; 
     e.put(std::move(trigger_decisions));
-    std::cout << "PUT2??\n"; 
     // Trigger decision
     return passed;
 }

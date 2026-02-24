@@ -1,3 +1,16 @@
+#ifndef GUARD_DDT_ATMNU_TRIGGER_HH
+#define GUARD_DDT_ATMNU_TRIGGER_HH
+
+
+
+#include "DDTBaseDataProducts/BaseProducts.h"
+#include "DDTBaseDataProducts/DAQHit.h"
+#include "DDTBaseDataProducts/HitList.h"
+#include "DDTBaseDataProducts/TriggerDecision.h"
+
+#include <art/Framework/Principal/Handle.h>
+#include <fhiclcpp/ParameterSet.h>
+
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -12,6 +25,7 @@
 #include <fstream>
 #include <array>
 
+#include "DDTBaseDataProducts/TriggerDecision.h"
 #include "Tracktrigger.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -86,12 +100,16 @@ public:
     
     bool run_algorithm(std::vector<Hit>& hits, const art::Event& event);
 
+    std::vector<novaddt::TriggerDecision> TriggerDecisions() const;
+
     size_t sum=0;
 private:
     std::string model_filename;
     PrepareClusterParameters _PrepareClusterParameters;
     GradientBoostingModel    _GradientBoostingModel;
+    std::vector<novaddt::TriggerDecision> _triggerDecisions;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
+#endif 

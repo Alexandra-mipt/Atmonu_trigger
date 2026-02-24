@@ -1,0 +1,914 @@
+BEGIN_PROLOG
+standard_containedslice:                                                                              
+{
+    module_type:        ContainedSlice                                                                
+    SliceModuleLabel:   removeonedslices# module making tracks                                        
+    SliceInstanceLabel: TwoDSlices      # instance making tracks                                      
+    Xmin:               5           # lower x fiducial cut (there are 384 FD cells per plane)         
+    Xmax:               379         # upper x fiducial cut                                            
+    Ymin:               7           # lower y fiducial cut
+    Ymax:               377         # upper y fiducial cut                                            
+    Zmin:               10           # lower z fiducial cut (there are 896 FD planes)                  
+    Zmax:               886         # upper z fiducial cut                                            
+    UseSecondaryZCuts:  false       # Apply the optional secondary z cuts
+    SecondaryZmin:      0           # optional secondary lower z fiducial cut                         
+    SecondaryZmax:      896         # optional secondary upper z fiducial cut                         
+    Autoconfigure:      false       # Autoconfigure z containment cuts                                
+    AutoconfigureMinZOffset:  3     # The distance from the lower edge set by autoconfigure           
+    AutoconfigureMaxZOffset:  3     # The distance from the upper edge set by autoconfigure           
+    AutoconfigureInterval: 1000     # Run autoconfigure after every this number of events             
+    Detector:           FD          # Detector, can be one of FD, ND or NDOS                          
+    AutoconfigureSliceModuleLabel:   tdcsort        # module making tracks 
+    AutoconfigureSliceInstanceLabel: TDCSortedHits  # instance making tracks                          
+    Verbose:            false        
+    }
+END_PROLOG
+
+BEGIN_PROLOG
+standard_daq: 
+{
+  generator:              "NovaFragmentReader"
+  queue_depth:            10
+  n_events:               -1
+  resume_after_timeout:   true
+  resume_after_overwrite: true
+  run_number:             1
+  waiting_time:           1
+}
+END_PROLOG
+BEGIN_PROLOG
+
+standard_waveformprocessor:
+{
+  ShapeTableFilename: "DDTCore/adc_shape_fit_table_fd_460_7000_spar.root" # No ADC branch. UseMulti4ADC must be "false"
+  SampleTime:         500  #ns
+  RiseTime:           0.92 #samples
+  FallTime:           14   #samples
+  UseMulti:           true 
+  UseMulti4ADC:       false
+  DoHighADCFits:      true
+}
+
+standard_waveformprocessor_nd:
+{
+  ShapeTableFilename: "DDTCore/adc_shape_fit_table_nd.root"
+  SampleTime:         125  #ns
+  RiseTime:           0.64 #samples
+  FallTime:           36   #samples
+  UseMulti:           false
+  UseMulti4ADC:       false
+  DoHighADCFits:      true
+}
+
+standard_waveformprocessor_ndos:
+   @local::standard_waveformprocessor
+standard_waveformprocessor_ndos.UseMulti: true
+
+END_PROLOG
+
+BEGIN_PROLOG
+
+standard_services:
+{
+  WaveformProcessor:     @local::standard_waveformprocessor
+}
+
+standard_services_nd:
+{
+  WaveformProcessor:     @local::standard_waveformprocessor_nd
+}
+
+standard_services_ndos:
+{
+  WaveformProcessor:     @local::standard_waveformprocessor_ndos
+}
+
+END_PROLOG
+BEGIN_PROLOG
+standard_eventprescale:
+{
+    module_type:    EventPrescale
+    prescale:       1
+    mode:           fixed
+}
+
+eventprescale_10: @local::standard_eventprescale
+eventprescale_10.prescale: 10
+
+random_eventprescale: @local::standard_eventprescale
+random_eventprescale.mode: random
+
+random_eventprescale_10: @local::random_eventprescale
+random_eventprescale_10.prescale: 10
+
+END_PROLOG
+BEGIN_PROLOG
+
+
+fmm_highadcfilter:
+{
+module_type: HighADCFilter
+hits_label:  tdcsort
+instance:    TDCSortedHits
+ADC_min:     500
+ADC_max:     5000
+}
+
+smm_highadcfilter:
+{
+module_type: HighADCFilter
+hits_label:  tdcsort
+instance:    TDCSortedHits
+ADC_min:     225
+ADC_max:     4000
+}
+
+
+END_PROLOG
+BEGIN_PROLOG
+
+standard_houghtracker:
+{
+  module_type:              HoughTracker
+
+  slice_label:              "tdslice"
+  slice_instance:           ""
+  max_tdc_separation:       50
+  max_plane_separation:     20
+  max_cell_separation:      50
+  velocity_cut:             4.0
+  minimum_points_to_tag:    10  
+  minimum_hits_per_track:   5
+  maximum_hits_per_slice:   1200
+  parallel:                 false
+}
+
+standard_houghtracker_numu:
+{
+  module_type:              HoughTracker
+  slice_label:              "removeonedslices"
+  slice_instance:           "TwoDSlices"
+  max_tdc_separation:       50
+  max_plane_separation:     30
+  max_cell_separation:      50
+  velocity_cut:             4.0
+  minimum_points_to_tag:    5
+  minimum_hits_per_track:   5
+  maximum_hits_per_slice:   1200
+  parallel:                 false
+}
+
+ndos_houghtracker_numu:                 @local::standard_houghtracker_numu
+ndos_houghtracker_numu.slice_label:     "spaceslice"
+ndos_houghtracker_numu.slice_instance:  "TimeSpaceSlice"
+
+standard_houghtracker_numu_contained:
+{
+  module_type:              HoughTracker
+  slice_label:              "containedslice"
+  slice_instance:           "ContainedTimeSpaceSlice"
+  max_tdc_separation:       50
+  max_plane_separation:     30
+  max_cell_separation:      30
+  velocity_cut:             4.0
+  minimum_points_to_tag:    5
+  minimum_hits_per_track:   5
+  maximum_hits_per_slice:   1200
+  parallel:                 false
+}
+
+END_PROLOG
+##include "LiveDataStream.fcl"
+BEGIN_PROLOG
+
+standard_merge2dtracks:
+{
+    module_type:                Merge2DTracks
+    TrackModuleLabel:           "patrec"                    # module making tracks
+    TrackInstanceLabel:         ""                          # instance making tracks
+    TrackToSliceInstanceLabel:  "toSlices"                  # instance of track to slice association produced by track module
+    SliceModuleLabel:           "containedslice"            # module making slices
+    SliceInstanceLabel:         "ContainedTimeSpaceSlice"   # instance making slices
+    SimpleTwoViewMode:          false                       # A boolean switch to a mode where we expect exactly two tracks and we combine these without checking metrics
+    AlwaysMergeMin:             false                       # A boolean switch to force the merge of the track pair with the minimum metric
+    MatchingMetric:             "dZ"                        # the method used to match tracks
+                                                            # currently configured options are: 
+                                                            #       dZ - sqrt(dZ_start^2 + dZ_end^2)
+    #AmbiguityMetric:            "length"                    # the method used to break matching degeneracies
+    AmbiguityMetric:            "nhits"                     # the method used to break matching degeneracies
+                                                            # currently configured options are: 
+                                                            #       length - the longest pair are selected
+                                                            #       nhits - the pair with the most hits are selected
+    MetricThreshold:            10                          # the maximum value of metric which can be considered matched
+    MinHits:                    0                           # Minimum number of hits per slice
+}
+
+standard_merge2dtracks_hough: @local::standard_merge2dtracks
+standard_merge2dtracks_hough.TrackModuleLabel:  "houghtracker"
+standard_merge2dtracks_hough.SliceModuleLabel:  "removeonedslices"
+standard_merge2dtracks_hough.SliceInstanceLabel:"TwoDSlices"
+
+ndos_merge2dtracks_hough: @local::standard_merge2dtracks
+ndos_merge2dtracks_hough.TrackModuleLabel:  "houghtracker"
+ndos_merge2dtracks_hough.SliceModuleLabel:  "spaceslice"
+ndos_merge2dtracks_hough.SliceInstanceLabel:"TimeSpaceSlice"
+
+standard_merge2dtracks_hough_contained: @local::standard_merge2dtracks_hough
+standard_merge2dtracks_hough_contained.TrackModuleLabel:  "houghtrackercontained"
+standard_merge2dtracks_hough_contained.SliceModuleLabel:  "containedslice"
+standard_merge2dtracks_hough_contained.SliceInstanceLabel:"ContainedTimeSpaceSlice"
+
+loose_merge2dtracks_hough_contained: @local::standard_merge2dtracks_hough_contained
+loose_merge2dtracks_hough_contained.MetricThreshold: 15
+loose_merge2dtracks_hough_contained.AlwaysMergeMin:  true
+
+END_PROLOG
+BEGIN_PROLOG
+
+standard_moonshadow:
+{
+  module_type: MoonShadow
+
+  prescale: 1
+
+  Track3DLabel: "merge2dtracks"
+
+  AngleCut: 5 # degrees
+  
+  AvgRate:		16 # Hz
+  AngularSuppression:	5 #sigma
+  LengthCut:		150 #cm
+  BinCut:		10 #number of bins
+  
+  InputHitLabel: "hitProducer"
+  InputHitInstance: "DDTdaq"
+}
+
+END_PROLOG
+BEGIN_PROLOG
+
+standard_waveformprocessor:
+{
+  ShapeTableFilename: "DDTCore/adc_shape_fit_table_fd_460_7000_spar.root" # No ADC branch. UseMulti4ADC must be "false"
+  SampleTime:         500  #ns
+  RiseTime:           0.92 #samples
+  FallTime:           14   #samples
+  UseMulti:           true 
+  UseMulti4ADC:       false
+  DoHighADCFits:      true
+}
+
+standard_waveformprocessor_nd:
+{
+  ShapeTableFilename: "DDTCore/adc_shape_fit_table_nd.root"
+  SampleTime:         125  #ns
+  RiseTime:           0.64 #samples
+  FallTime:           36   #samples
+  UseMulti:           false
+  UseMulti4ADC:       false
+  DoHighADCFits:      true
+}
+
+standard_waveformprocessor_ndos:
+   @local::standard_waveformprocessor
+standard_waveformprocessor_ndos.UseMulti: true
+
+END_PROLOG
+
+BEGIN_PROLOG
+
+standard_novaddthitproducer:
+{
+ module_type: "NovaDDTHitProducer"
+ raw_label:   "novadaq"
+ offline_mode: false
+}
+
+END_PROLOG
+BEGIN_PROLOG
+
+standard_removenoise:
+  {
+    module_type: RemoveNoise
+    gh_label:    timeslice
+    instance:    TDCSlice
+    MinHits:     10
+  }
+
+monopole_removenoise:
+  {
+    module_type: RemoveNoise
+    gh_label:    timesliceFMono
+    instance:    TDCSlice
+    MinHits:     10
+  }
+
+END_PROLOG
+##include "RemoveOneDSlices.fcl"
+BEGIN_PROLOG
+
+standard_removespatialnoise:
+  {
+    module_type:    RemoveSpatialNoise
+    InputLabel:     spaceslice
+    InputInstance:  TimeSpaceSlice
+    MaxXYGap:       10
+    MinXYHits:      3
+  }
+
+END_PROLOG
+BEGIN_PROLOG
+
+standard_restricthitsbyplane_fd_2db:
+  {
+    module_type:    RestrictHitsByPlane
+    InputLabel:     hitProducer
+    InputInstance:  ""
+    MaxPlane:       127
+  }
+
+standard_restricthitsbyplane_fd_3db:
+  {
+    module_type:    RestrictHitsByPlane
+    InputLabel:     hitProducer
+    InputInstance:  ""
+    MaxPlane:       191
+  }
+
+standard_restricthitsbyplane_fd_4db:
+  {
+    module_type:    RestrictHitsByPlane
+    InputLabel:     hitProducer
+    InputInstance:  ""
+    MaxPlane:       255
+  }
+
+standard_restricthitsbyplane_fd_5db:
+  {
+    module_type:    RestrictHitsByPlane
+    InputLabel:     hitProducer
+    InputInstance:  ""
+    MaxPlane:       319
+  }
+
+standard_restricthitsbyplane_fd_6db:
+  {
+    module_type:    RestrictHitsByPlane
+    InputLabel:     hitProducer
+    InputInstance:  ""
+    MaxPlane:       383
+  }
+
+standard_restricthitsbyplane_fd_7db:
+  {
+    module_type:    RestrictHitsByPlane
+    InputLabel:     hitProducer
+    InputInstance:  ""
+    MaxPlane:       447
+  }
+
+standard_restricthitsbyplane_fd_8db:
+  {
+    module_type:    RestrictHitsByPlane
+    InputLabel:     hitProducer
+    InputInstance:  ""
+    MaxPlane:       511
+  }
+
+standard_restricthitsbyplane_fd_9db:
+  {
+    module_type:    RestrictHitsByPlane
+    InputLabel:     hitProducer
+    InputInstance:  ""
+    MaxPlane:       575
+  }
+
+standard_restricthitsbyplane_fd_10db:
+  {
+    module_type:    RestrictHitsByPlane
+    InputLabel:     hitProducer
+    InputInstance:  ""
+    MaxPlane:       639
+  }
+
+standard_restricthitsbyplane_fd_11db:
+  {
+    module_type:    RestrictHitsByPlane
+    InputLabel:     hitProducer
+    InputInstance:  ""
+    MaxPlane:       703
+  }
+
+standard_restricthitsbyplane_fd_12db:
+  {
+    module_type:    RestrictHitsByPlane
+    InputLabel:     hitProducer
+    InputInstance:  ""
+    MaxPlane:       767
+  }
+
+standard_restricthitsbyplane_fd_13db:
+  {
+    module_type:    RestrictHitsByPlane
+    InputLabel:     hitProducer
+    InputInstance:  ""
+    MaxPlane:       831
+  }
+  
+standard_restricthitsbyplane_fd:
+  {
+    module_type:    RestrictHitsByPlane
+    InputLabel:     hitProducer
+    InputInstance:  ""
+    MaxPlane:       895
+  }
+
+END_PROLOG
+BEGIN_PROLOG
+root_file_reader: 
+{
+  module_type: RootInput
+  fileNames:   nil
+}
+END_PROLOG
+BEGIN_PROLOG
+
+standard_singletonrejection:
+  {
+    module_type:    SingletonRejection
+    InputLabel:     tdcsort
+    InputInstance:  TDCSortedHits
+    MinCellSep:     4 ## Minimum X or Y separation
+    MinPlaneSep:    5 ## Minimum Z separation
+    MinTDCSep:      30 ## Minimum time separation
+  }
+  
+loose_singletonrejection: @local::standard_singletonrejection
+loose_singletonrejection.MinCellSep:     6
+loose_singletonrejection.MinPlaneSep:    7
+loose_singletonrejection.MinTDCSep:      50
+
+tight_singletonrejection: @local::standard_singletonrejection
+tight_singletonrejection.MinCellSep:     2
+tight_singletonrejection.MinPlaneSep:    3
+tight_singletonrejection.MinTDCSep:      10
+
+END_PROLOG
+BEGIN_PROLOG
+standard_sliceprescale:
+{
+    module_type:    SlicePrescale
+    slice_label:    spaceslice
+    slice_instance: TimeSpaceSlice
+    prescale:       1
+    mode:           fixed
+}
+
+sliceprescale_10: @local::standard_sliceprescale
+sliceprescale_10.prescale: 10
+
+random_sliceprescale: @local::standard_sliceprescale
+random_sliceprescale.mode: random
+
+random_sliceprescale_10: @local::random_sliceprescale
+random_sliceprescale_10.prescale: 10
+
+END_PROLOG
+BEGIN_PROLOG
+standard_tdcsort:
+{
+  module_type: SortByTDC
+  hits_label:  hitProducer
+  hits_instance: AllHits
+}
+
+mcs_tdcsort:
+{
+  module_type: SortByTDC
+  hits_label:  hitProducer
+  hits_instance: MCSHits
+}
+
+adcfiltered_tdcsort:
+{
+  module_type: SortByTDC
+  hits_label:  adcfilter
+  hits_instance: HEHits
+}
+END_PROLOG
+BEGIN_PROLOG
+
+standard_spaceslice:
+  {
+    module_type: SpaceSlice
+    gh_label:    removenoise
+    instance:    TDCSliceClean
+    MaxZGap:     10
+    MinHits:     10
+  }
+
+monopole_spaceslice:
+  {
+    module_type: SpaceSlice
+    gh_label:    removenoiseFMono
+    instance:    TDCSliceClean
+    MaxZGap:     4
+    MinHits:     10
+  } 
+
+END_PROLOG
+BEGIN_PROLOG
+
+
+standard_timeslice:
+{
+module_type: TimeSlice
+hits_label:  tdcsort
+instance:    TDCSortedHits
+TimeWindow:  70
+MinHits:     10
+}
+
+fastmonopole_timeslice: 
+{
+module_type: TimeSlice
+hits_label:  fmmhighadcfilter
+instance:    HEHits
+TimeWindow:  200
+MinHits:     10
+}
+
+slowmonopole_timeslice:
+{
+module_type: TimeSlice
+hits_label:  smmhighadcfilter
+instance:    HEHits
+TimeWindow:  500
+MinHits:     50
+}
+
+singletonrejection_timeslice: @local::standard_timeslice
+singletonrejection_timeslice.hits_label: singletonrejection
+singletonrejection_timeslice.instance: SingletonRejected
+
+upmu_timeslice: @local::standard_timeslice
+upmu_timeslice.TimeWindow: 25
+
+upmu_offline_timeslice: @local::standard_timeslice
+upmu_offline_timeslice.TimeWindow: 5
+
+END_PROLOG
+BEGIN_PROLOG
+
+standard_trackfit:
+{
+ module_type:    TrackFit
+ slice_label:    spaceslice
+ slice_instance: TimeSpaceSlice
+ DHitGood: 6
+ SortOutputHits:    true
+ assn_to_slice_instance: toSlices
+}
+
+END_PROLOG
+BEGIN_PROLOG
+
+standard_staticmap:{
+    StaticMapService:{
+        source:"NoiseMap_current.nhm"
+    }
+}
+
+END_PROLOG
+
+##include "SNMessageService.fcl"
+BEGIN_PROLOG
+
+standard_noisehitfinder:	
+{
+  module_type:    NoiseHitFinder
+  inputTag: "hitProducer:AllHits"
+  outputTag: ""
+  Noise: {min:1 }
+}
+
+END_PROLOG
+BEGIN_PROLOG
+
+standard_hitsub:
+{
+  module_type:    HitSubtract
+  label: "hitsub"
+  expr: @nil  #e.g.: "DAQhit+hits1-houghtracker[]"
+}
+
+activity_hitsub: @local::standard_hitsub
+activity_hitsub.expr: "hitProducer:AllHits-houghtracker[]-michel-highefinder[]"
+
+supernova_hitsub: @local::standard_hitsub
+supernova_hitsub.expr: "hitsSN0:hitsub-noisefinder"
+
+END_PROLOG
+BEGIN_PROLOG
+
+standard_michel:
+{
+  module_type:   MichelEfinder
+  TracksTag: "houghtracker"
+  HitsTag:   "tdcsort:TDCSortedHits"
+  window: { 
+    MaxDistance: 8
+    TimeRange: {min:-2 max:10}
+  }
+}
+
+END_PROLOG
+BEGIN_PROLOG
+
+standard_sliceselector:
+{
+     ADC:{ min:120 max:600 }
+     nHits:{ 
+        Total:{min:2 max:50}
+        View: {min:1 max:50}
+        }
+     FV:{
+        x:{} 
+        y:{} 
+        z:{}
+     }
+}
+
+fd_candidates_xy:
+{
+    ADC:{ min:230 max:910 }
+    nHits:{ View:{ min:1} Total:{ max:4 } }
+    FV:{ 
+        x:{ min:20 max:376 }
+        y:{ min:15 max:366 }
+        z:{ min:8  max:888 }
+    }        
+}
+
+nd_candidates_xy:
+{
+    ADC:{ min:280 max:1430 }
+    nHits:{ View:{ min:1} Total:{ max:4 } }
+    FV:{ 
+        x:{ min:10 max:86 }
+        y:{ min:0 max:81 }
+        z:{ min:8  max:190 }
+    } 
+}
+
+
+highe_sliceselector:
+{
+    ADC:{ min:100000 }
+}
+END_PROLOG
+BEGIN_PROLOG
+
+standard_highefinder:
+{
+    module_type: HighEFinder
+    slice_cuts:  {ADC: {min: 100000}}
+    slices_tag:  "timeslice:TDCSlice"
+    hits_tag:    "tdcsort:TDCSortedHits"
+    output_tag:  ""
+    TimeRange:  {
+                 min: 0  
+                 max: 22400 # 350us*64 MHz
+                 } 
+
+}
+highefinder_nd: @local::standard_highefinder
+highefinder_nd.slice_cuts.ADC.min: 300000
+
+highefinder_fd: @local::standard_highefinder
+
+END_PROLOG
+BEGIN_PROLOG
+
+standard_multiplet:
+  {
+    module_type:  Multiplet
+    InputTag:     "tdcsort:TDCSortedHits"
+    slicer:{
+        MaxPlaneSep:    1     ## Max size of slice in planes
+        MaxCellSep:     2     ## Max size of slice in planes
+        MaxTDCSep:      4     ## Max Time in TDC ticks for hits to be connected
+        MinSliceSize:   2     ## need at least this many hits to keep a slice
+        MaxSliceSize:   20     ## throw away slices bigger than this
+        MaxDT: {xx:4 xy:4}
+    }
+    ApplyTimingCorrection: false
+    ApplyDistCorrection: false
+    Verbose:        false ## spew text or not
+  }
+
+corrected_multiplet: @local::standard_multiplet
+corrected_multiplet.slicer.MaxTDCSep:7
+corrected_multiplet.slicer.MaxDT: {xx:4 xy:2}
+corrected_multiplet.ApplyTimingCorrection: true
+corrected_multiplet.ApplyDistCorrection: true
+
+
+multiplet_nd: @local::standard_multiplet
+multiplet_fd: @local::corrected_multiplet
+
+END_PROLOG
+##include "ChannelMapMaker.fcl"
+##include "HotMapMaker.fcl"
+BEGIN_PROLOG
+
+dropdcmfilter_fd:
+{
+  module_type:    DropoutDCMFilter
+  hits_tag: "DDTdaq:"
+  min_dcms_active: 160
+}
+
+dropdcmfilter_nd: @local::dropdcmfilter_fd
+dropdcmfilter_nd.min_dcms_active: 10
+
+END_PROLOG
+BEGIN_PROLOG
+
+track_long_procedure:
+{
+# Module Configuration
+    module_type:       "Tracktrigger"
+    TrackModuleTag:    "merge2dtracksthru:"
+    AssnsTag:          "merge2dtracksthru:toSlices"
+
+
+# Trigger Configuration
+                         is_long_procedure: true
+                         gaps_min:         0.0
+                         gaps_max:         1e9
+                         length_min:       40.0
+                         length_max:       1e9
+                         max_gap:          6
+                         epsilon:          1.6
+                         total_hits_min:   26
+                         total_hits_max:   193
+
+                         length_weight:    0.5
+                         hits_weight:      0.1
+                         gaps_weight:      0.8
+                         score_threshold: -0.3
+
+                         xz_cut:          10.8
+                         yz_cut:          18.0
+                         xy_cut:          0.0
+
+                         min_hits:        11
+                         
+                         prescale:        1
+}
+
+track_short_procedure:
+{
+# Module Configuration
+    module_type:       "Tracktrigger"
+    TrackModuleTag:    "merge2dtracksthru:"
+    AssnsTag:          "merge2dtracksthru:toSlices"
+ 
+# Trigger Configuration
+
+                        gaps_min:         0.0
+                        gaps_max:         1e9
+                        length_min:       40.0
+                        length_max:       1e9
+                        max_gap:          6
+                        epsilon:          1.6
+                        total_hits_min:   26
+                        total_hits_max:   193
+    
+                        length_weight:    0.5
+                        hits_weight:      0.1
+                        gaps_weight:      0.8
+    
+                        xz_cut:          19.8
+                        yz_cut:          24
+                        xy_cut:          0.0
+    
+}
+
+non_track_procedure:
+{
+# Module Configuration
+    module_type:       "Nontracktrigger"
+    SliceModuleTag:    "notrackSlices"
+
+# Trigger Configuration
+
+                        model_filename:  "gb_model_cpp.txt"
+                        thr_opt:         0.63875492
+                        
+                        prescale:        1
+}
+
+END_PROLOG
+
+
+services:
+{
+  @table::standard_services
+  TFileService: { fileName: "triggers.tree.root" closeFileFast: false }
+}
+
+physics:
+{
+  producers:
+  {
+    #hitProducer:        @local::standard_novaddthitproducer
+    hitProducer:       {module_type:"HitSubtract" label: "AllHits" expr:"daqhit"}
+    track:              @local::standard_trackfit
+  }
+
+  filters:
+  {
+    tdcsort:                @local::standard_tdcsort
+    singletonrejection:     @local::standard_singletonrejection
+    timeslice:              @local::singletonrejection_timeslice
+    removenoise:            @local::standard_removenoise
+    spaceslice:             @local::standard_spaceslice
+    multiplet:              @local::corrected_multiplet
+    removespatialnoise:     @local::standard_removespatialnoise
+    #removeonedslices:       @local::standard_removeonedslices
+    selectcontainedslice:   @local::standard_containedslice
+    houghtrackercontained:  @local::standard_houghtracker_numu_contained
+    #merge2dtracks:          @local::loose_merge2dtracks_hough_contained
+    merge2dtracks:          @local::standard_merge2dtracks_hough_contained
+    houghtracker:           @local::standard_houghtracker_numu
+    merge2dtracksthru:      @local::standard_merge2dtracks_hough
+    prescale:               @local::standard_sliceprescale
+    tracklong:              @local::track_long_procedure  
+    nontrackprocedure:      @local::non_track_procedure
+    notrackSlices:    {
+        module_type:"SelectNotrackSlices"
+        slices_tag: "selectcontainedslice:ContainedTimeSpaceSlice"
+        assns_tag:  "merge2dtracksthru:toSlices"
+    }
+  }
+
+  analyzers:
+{}
+
+ atmonu:  [
+    hitProducer, tdcsort, singletonrejection, timeslice,
+    removenoise, spaceslice, removespatialnoise, 
+    #removeonedslices, 
+    selectcontainedslice, 
+    #houghtrackercontained, merge2dtracks, 
+    houghtracker, merge2dtracksthru, 
+    notrackSlices,
+    tracklong #,
+  #  nontrackprocedure
+#    dcmfilter,
+    ]
+
+ output: [out]
+ end_paths: [output]
+
+}
+
+
+outputs:
+{
+   out:{
+      module_type: RootOutput
+      fileName: "datahough.artdaq.root"
+      fastCloning: false
+   }
+
+}
+
+daq:              @local::standard_daq
+daq.queue_depth:  2
+# daq.n_events:    100
+
+# if using ddt-filter binary:
+#process_name:     DDT
+#source:           @local::live_data_stream
+
+# if using nova binary:
+process_name:     DDTOffline
+source:           @local::root_file_reader
+# Miscellaneous Settings:
+physics.filters.merge2dtracksthru.MinHits:           60
+
+
+physics.filters.selectcontainedslice.SliceModuleLabel: "removespatialnoise"
+physics.filters.selectcontainedslice.SliceInstanceLabel: "CleanTimeSpaceSlice"
+physics.filters.houghtracker.slice_label: "selectcontainedslice"
+physics.filters.houghtracker.slice_instance: "ContainedTimeSpaceSlice"
+
+physics.filters.merge2dtracksthru.SliceModuleLabel: "selectcontainedslice"
+physics.filters.merge2dtracksthru.SliceInstanceLabel: "ContainedTimeSpaceSlice"
+
+# The following two lines turn on the time reporting:
+# services.TimeTracker:                                    { }
+# services.schedulnner.wantSummary:                     true

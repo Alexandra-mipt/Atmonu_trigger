@@ -1,0 +1,625 @@
+%MSG-i MF_INIT_OK:  Early 24-Feb-2026 21:56:35 MSK JobSetup
+Messagelogger initialization complete.
+%MSG
+%MSG-i path:  Early 24-Feb-2026 21:56:36 MSK JobSetup
+The following module labels are not assigned to any path:
+'houghtrackercontained', 'merge2dtracks', 'multiplet', 'prescale', 'track', 'tracklong'
+
+%MSG
+DDTCore/adc_shape_fit_table_fd_460_7000_spar.root
+24-Feb-2026 21:56:36 MSK  Initiating request to open input file "/nova/ana/atmo_nu/select_cuts/ddtfile_10k_signal.artdaq.root"
+24-Feb-2026 21:56:36 MSK  Opened input file "/nova/ana/atmo_nu/select_cuts/ddtfile_10k_signal.artdaq.root"
+%MSG-i HitSub expression:  HitSubtract:hitProducer@Construction  24-Feb-2026 21:56:37 MSK ModuleConstruction
+parse string:'daqhit'
+%MSG
+--- novaddt::SingletonRejection begin
+	 Input hitlists label:    tdcsort
+	 Input hitlists instance  TDCSortedHits
+	 Min X or Y separation:   4
+	 Min Z separation:        5
+	 Min time separation:     30
+=== novaddt::RemoveSpatialNoise instantiate
+	 input hits label:        spaceslice
+	 input hits instance:     TimeSpaceSlice
+	 Max XY gap:              10
+	 Min X/Y hits:            3
+--- novaddt::ContainedSlice instantiate
+	 SliceModuleLabel:          removespatialnoise
+	 SliceInstanceLabel:        CleanTimeSpaceSlice
+	 X fiducial cuts:           5 to 379
+	 Y fiducial cuts:           7 to 377
+	 Z fiducial cuts:           10 to 886
+	 Use secondary z cuts:      0
+	 Secondary Z fiducial cuts: 0 to 896
+	 Autoconfigure:             0
+	 Autoconfigure min Z offset:3
+	 Autoconfigure max Z offset:3
+	 Autoconfigure interval:    1000
+	 Detector:                  FD
+	 AC SliceModuleLabel:       tdcsort
+	 AC SliceInstanceLabel:     TDCSortedHits
+	 Verbose:                   0
+=== novaddt::Merge2DTracks instantiate
+	 TrackModuleLabel:          houghtracker
+	 TrackInstanceLabel:        
+	 SliceModuleLabel:          selectcontainedslice
+	 SliceInstanceLabel:        ContainedTimeSpaceSlice
+	 TrackToSliceInstanceLabel: toSlices
+	 SimpleTwoViewMode:         0
+	 AlwaysMergeMin:            0
+	 MatchingMetric:            dZ
+	 AmbiguityMetric:           nhits
+	 MetricThreshold:           10
+%MSG-i FastCloning:  RootOutput:out@Construction 24-Feb-2026 21:56:37 MSK  ModuleConstruction
+Initial fast cloning configuration (user-set): false
+%MSG
+Loading table from file for 1 time.
+Begin processing the 1st record. run: 9000001 subRun: 1 event: 1 at 24-Feb-2026 21:56:42 MSK
+slices-size: 0
+24-Feb-2026 21:56:43 MSK  Opened output file with pattern "datahough.artdaq.root"
+Begin processing the 2nd record. run: 9000001 subRun: 1 event: 2 at 24-Feb-2026 21:56:43 MSK
+slices-size: 0
+Begin processing the 3rd record. run: 9000001 subRun: 1 event: 3 at 24-Feb-2026 21:56:43 MSK
+slices-size: 29
+
+=== Event ID: 3 ===
+
+sum: 29
+HITS: 29
+HITS_after_gb: 0
+Begin processing the 4th record. run: 9000001 subRun: 1 event: 4 at 24-Feb-2026 21:56:43 MSK
+slices-size: 71
+
+=== Event ID: 4 ===
+
+sum: 42
+HITS: 42
+HITS_after_gb: 0
+Begin processing the 5th record. run: 9000001 subRun: 1 event: 5 at 24-Feb-2026 21:56:44 MSK
+slices-size: 71
+Begin processing the 6th record. run: 9000001 subRun: 1 event: 6 at 24-Feb-2026 21:56:44 MSK
+slices-size: 71
+Begin processing the 7th record. run: 9000001 subRun: 1 event: 7 at 24-Feb-2026 21:56:44 MSK
+slices-size: 71
+Begin processing the 8th record. run: 9000001 subRun: 1 event: 8 at 24-Feb-2026 21:56:45 MSK
+slices-size: 71
+Begin processing the 9th record. run: 9000001 subRun: 1 event: 9 at 24-Feb-2026 21:56:45 MSK
+slices-size: 71
+Begin processing the 10th record. run: 9000001 subRun: 1 event: 10 at 24-Feb-2026 21:56:45 MSK
+slices-size: 71
+Begin processing the 11th record. run: 9000001 subRun: 1 event: 11 at 24-Feb-2026 21:56:45 MSK
+slices-size: 117
+
+=== Event ID: 11 ===
+
+sum: 46
+HITS: 46
+HITS_after_gb: 0
+Begin processing the 12th record. run: 9000001 subRun: 1 event: 12 at 24-Feb-2026 21:56:46 MSK
+slices-size: 207
+
+=== Event ID: 12 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 13th record. run: 9000001 subRun: 1 event: 13 at 24-Feb-2026 21:56:46 MSK
+slices-size: 249
+
+=== Event ID: 13 ===
+
+sum: 42
+HITS: 42
+HITS_after_gb: 0
+Begin processing the 14th record. run: 9000001 subRun: 1 event: 14 at 24-Feb-2026 21:56:46 MSK
+slices-size: 269
+
+=== Event ID: 14 ===
+
+sum: 20
+HITS: 20
+HITS_after_gb: 0
+Begin processing the 15th record. run: 9000001 subRun: 1 event: 15 at 24-Feb-2026 21:56:47 MSK
+slices-size: 291
+
+=== Event ID: 15 ===
+
+sum: 22
+HITS: 22
+HITS_after_gb: 22
+min: 2774268540max: 2774269146
+Begin processing the 16th record. run: 9000001 subRun: 1 event: 16 at 24-Feb-2026 21:56:47 MSK
+slices-size: 317
+
+=== Event ID: 16 ===
+
+sum: 26
+HITS: 26
+HITS_after_gb: 0
+Begin processing the 17th record. run: 9000001 subRun: 1 event: 17 at 24-Feb-2026 21:56:47 MSK
+slices-size: 317
+Begin processing the 18th record. run: 9000001 subRun: 1 event: 18 at 24-Feb-2026 21:56:47 MSK
+slices-size: 330
+
+=== Event ID: 18 ===
+
+sum: 13
+HITS: 13
+HITS_after_gb: 13
+min: 2793468794max: 2793469399
+Begin processing the 19th record. run: 9000001 subRun: 1 event: 19 at 24-Feb-2026 21:56:48 MSK
+slices-size: 398
+
+=== Event ID: 19 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 20th record. run: 9000001 subRun: 1 event: 20 at 24-Feb-2026 21:56:48 MSK
+slices-size: 398
+Begin processing the 21st record. run: 9000001 subRun: 1 event: 21 at 24-Feb-2026 21:56:48 MSK
+slices-size: 440
+
+=== Event ID: 21 ===
+
+sum: 42
+HITS: 42
+HITS_after_gb: 0
+Begin processing the 22nd record. run: 9000001 subRun: 1 event: 22 at 24-Feb-2026 21:56:49 MSK
+slices-size: 440
+Begin processing the 23rd record. run: 9000001 subRun: 1 event: 23 at 24-Feb-2026 21:56:49 MSK
+slices-size: 477
+
+=== Event ID: 23 ===
+
+sum: 37
+HITS: 37
+HITS_after_gb: 0
+Begin processing the 24th record. run: 9000001 subRun: 1 event: 24 at 24-Feb-2026 21:56:49 MSK
+slices-size: 477
+Begin processing the 25th record. run: 9000001 subRun: 1 event: 25 at 24-Feb-2026 21:56:49 MSK
+slices-size: 576
+
+=== Event ID: 25 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 26th record. run: 9000001 subRun: 1 event: 26 at 24-Feb-2026 21:56:50 MSK
+slices-size: 587
+
+=== Event ID: 26 ===
+
+sum: 11
+HITS: 11
+HITS_after_gb: 0
+Begin processing the 27th record. run: 9000001 subRun: 1 event: 27 at 24-Feb-2026 21:56:50 MSK
+slices-size: 587
+Begin processing the 28th record. run: 9000001 subRun: 1 event: 28 at 24-Feb-2026 21:56:50 MSK
+slices-size: 587
+Begin processing the 29th record. run: 9000001 subRun: 1 event: 29 at 24-Feb-2026 21:56:51 MSK
+slices-size: 587
+Begin processing the 30th record. run: 9000001 subRun: 1 event: 30 at 24-Feb-2026 21:56:51 MSK
+slices-size: 587
+Begin processing the 31st record. run: 9000001 subRun: 1 event: 31 at 24-Feb-2026 21:56:51 MSK
+slices-size: 587
+Begin processing the 32nd record. run: 9000001 subRun: 1 event: 32 at 24-Feb-2026 21:56:51 MSK
+slices-size: 587
+Begin processing the 33rd record. run: 9000001 subRun: 1 event: 33 at 24-Feb-2026 21:56:52 MSK
+slices-size: 604
+
+=== Event ID: 33 ===
+
+sum: 17
+HITS: 17
+HITS_after_gb: 17
+min: 2889467222max: 2889467823
+Begin processing the 34th record. run: 9000001 subRun: 1 event: 34 at 24-Feb-2026 21:56:52 MSK
+slices-size: 660
+
+=== Event ID: 34 ===
+
+sum: 56
+HITS: 56
+HITS_after_gb: 0
+Begin processing the 35th record. run: 9000001 subRun: 1 event: 35 at 24-Feb-2026 21:56:52 MSK
+slices-size: 678
+
+=== Event ID: 35 ===
+
+sum: 18
+HITS: 18
+HITS_after_gb: 0
+Begin processing the 36th record. run: 9000001 subRun: 1 event: 36 at 24-Feb-2026 21:56:52 MSK
+slices-size: 678
+Begin processing the 37th record. run: 9000001 subRun: 1 event: 37 at 24-Feb-2026 21:56:53 MSK
+slices-size: 812
+
+=== Event ID: 37 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 38th record. run: 9000001 subRun: 1 event: 38 at 24-Feb-2026 21:56:53 MSK
+slices-size: 893
+
+=== Event ID: 38 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 39th record. run: 9000001 subRun: 1 event: 39 at 24-Feb-2026 21:56:53 MSK
+slices-size: 972
+
+=== Event ID: 39 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 40th record. run: 9000001 subRun: 1 event: 40 at 24-Feb-2026 21:56:54 MSK
+slices-size: 1016
+
+=== Event ID: 40 ===
+
+sum: 44
+HITS: 44
+HITS_after_gb: 0
+Begin processing the 41st record. run: 9000001 subRun: 1 event: 41 at 24-Feb-2026 21:56:54 MSK
+slices-size: 1016
+Begin processing the 42nd record. run: 9000001 subRun: 1 event: 42 at 24-Feb-2026 21:56:54 MSK
+slices-size: 1031
+
+=== Event ID: 42 ===
+
+sum: 15
+HITS: 15
+HITS_after_gb: 0
+Begin processing the 43rd record. run: 9000001 subRun: 1 event: 43 at 24-Feb-2026 21:56:54 MSK
+slices-size: 1079
+
+=== Event ID: 43 ===
+
+sum: 48
+HITS: 48
+HITS_after_gb: 0
+Begin processing the 44th record. run: 9000001 subRun: 1 event: 44 at 24-Feb-2026 21:56:55 MSK
+slices-size: 1133
+
+=== Event ID: 44 ===
+
+sum: 54
+HITS: 54
+HITS_after_gb: 0
+Begin processing the 45th record. run: 9000001 subRun: 1 event: 45 at 24-Feb-2026 21:56:55 MSK
+slices-size: 1133
+Begin processing the 46th record. run: 9000001 subRun: 1 event: 46 at 24-Feb-2026 21:56:55 MSK
+slices-size: 1133
+Begin processing the 47th record. run: 9000001 subRun: 1 event: 47 at 24-Feb-2026 21:56:56 MSK
+slices-size: 1133
+Begin processing the 48th record. run: 9000001 subRun: 1 event: 48 at 24-Feb-2026 21:56:56 MSK
+slices-size: 1133
+Begin processing the 49th record. run: 9000001 subRun: 1 event: 49 at 24-Feb-2026 21:56:56 MSK
+slices-size: 1133
+Begin processing the 50th record. run: 9000001 subRun: 1 event: 50 at 24-Feb-2026 21:56:56 MSK
+slices-size: 1133
+Begin processing the 51st record. run: 9000001 subRun: 1 event: 51 at 24-Feb-2026 21:56:57 MSK
+slices-size: 1240
+
+=== Event ID: 51 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 52nd record. run: 9000001 subRun: 1 event: 52 at 24-Feb-2026 21:56:57 MSK
+slices-size: 1240
+Begin processing the 53rd record. run: 9000001 subRun: 1 event: 53 at 24-Feb-2026 21:56:57 MSK
+slices-size: 1376
+
+=== Event ID: 53 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 54th record. run: 9000001 subRun: 1 event: 54 at 24-Feb-2026 21:56:58 MSK
+slices-size: 1376
+Begin processing the 55th record. run: 9000001 subRun: 1 event: 55 at 24-Feb-2026 21:56:58 MSK
+slices-size: 1396
+
+=== Event ID: 55 ===
+
+sum: 20
+HITS: 20
+HITS_after_gb: 0
+Begin processing the 56th record. run: 9000001 subRun: 1 event: 56 at 24-Feb-2026 21:56:58 MSK
+slices-size: 1396
+Begin processing the 57th record. run: 9000001 subRun: 1 event: 57 at 24-Feb-2026 21:56:58 MSK
+slices-size: 1615
+
+=== Event ID: 57 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 58th record. run: 9000001 subRun: 1 event: 58 at 24-Feb-2026 21:56:59 MSK
+slices-size: 1635
+
+=== Event ID: 58 ===
+
+sum: 20
+HITS: 20
+HITS_after_gb: 0
+Begin processing the 59th record. run: 9000001 subRun: 1 event: 59 at 24-Feb-2026 21:56:59 MSK
+slices-size: 1699
+
+=== Event ID: 59 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 60th record. run: 9000001 subRun: 1 event: 60 at 24-Feb-2026 21:56:59 MSK
+slices-size: 1699
+Begin processing the 61st record. run: 9000001 subRun: 1 event: 61 at 24-Feb-2026 21:57:00 MSK
+slices-size: 1715
+
+=== Event ID: 61 ===
+
+sum: 16
+HITS: 16
+HITS_after_gb: 16
+min: 3068666910max: 3068667517
+Begin processing the 62nd record. run: 9000001 subRun: 1 event: 62 at 24-Feb-2026 21:57:00 MSK
+slices-size: 1770
+
+=== Event ID: 62 ===
+
+sum: 55
+HITS: 55
+HITS_after_gb: 0
+Begin processing the 63rd record. run: 9000001 subRun: 1 event: 63 at 24-Feb-2026 21:57:00 MSK
+slices-size: 1770
+Begin processing the 64th record. run: 9000001 subRun: 1 event: 64 at 24-Feb-2026 21:57:00 MSK
+slices-size: 1770
+Begin processing the 65th record. run: 9000001 subRun: 1 event: 65 at 24-Feb-2026 21:57:01 MSK
+slices-size: 1848
+
+=== Event ID: 65 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 66th record. run: 9000001 subRun: 1 event: 66 at 24-Feb-2026 21:57:01 MSK
+slices-size: 1848
+Begin processing the 67th record. run: 9000001 subRun: 1 event: 67 at 24-Feb-2026 21:57:01 MSK
+slices-size: 1848
+Begin processing the 68th record. run: 9000001 subRun: 1 event: 68 at 24-Feb-2026 21:57:02 MSK
+slices-size: 1848
+Begin processing the 69th record. run: 9000001 subRun: 1 event: 69 at 24-Feb-2026 21:57:02 MSK
+slices-size: 1848
+Begin processing the 70th record. run: 9000001 subRun: 1 event: 70 at 24-Feb-2026 21:57:02 MSK
+slices-size: 1897
+
+=== Event ID: 70 ===
+
+sum: 49
+HITS: 49
+HITS_after_gb: 0
+Begin processing the 71st record. run: 9000001 subRun: 1 event: 71 at 24-Feb-2026 21:57:02 MSK
+slices-size: 1897
+Begin processing the 72nd record. run: 9000001 subRun: 1 event: 72 at 24-Feb-2026 21:57:03 MSK
+slices-size: 1897
+Begin processing the 73rd record. run: 9000001 subRun: 1 event: 73 at 24-Feb-2026 21:57:03 MSK
+slices-size: 1897
+Begin processing the 74th record. run: 9000001 subRun: 1 event: 74 at 24-Feb-2026 21:57:03 MSK
+slices-size: 1897
+Begin processing the 75th record. run: 9000001 subRun: 1 event: 75 at 24-Feb-2026 21:57:04 MSK
+slices-size: 1897
+Begin processing the 76th record. run: 9000001 subRun: 1 event: 76 at 24-Feb-2026 21:57:04 MSK
+slices-size: 1912
+
+=== Event ID: 76 ===
+
+sum: 15
+HITS: 15
+HITS_after_gb: 0
+Begin processing the 77th record. run: 9000001 subRun: 1 event: 77 at 24-Feb-2026 21:57:04 MSK
+slices-size: 1932
+
+=== Event ID: 77 ===
+
+sum: 20
+HITS: 20
+HITS_after_gb: 0
+Begin processing the 78th record. run: 9000001 subRun: 1 event: 78 at 24-Feb-2026 21:57:04 MSK
+slices-size: 1932
+Begin processing the 79th record. run: 9000001 subRun: 1 event: 79 at 24-Feb-2026 21:57:05 MSK
+slices-size: 2014
+
+=== Event ID: 79 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 80th record. run: 9000001 subRun: 1 event: 80 at 24-Feb-2026 21:57:05 MSK
+slices-size: 2026
+
+=== Event ID: 80 ===
+
+sum: 12
+HITS: 12
+HITS_after_gb: 0
+Begin processing the 81st record. run: 9000001 subRun: 1 event: 81 at 24-Feb-2026 21:57:05 MSK
+slices-size: 2082
+
+=== Event ID: 81 ===
+
+sum: 56
+HITS: 56
+HITS_after_gb: 0
+Begin processing the 82nd record. run: 9000001 subRun: 1 event: 82 at 24-Feb-2026 21:57:06 MSK
+slices-size: 2104
+
+=== Event ID: 82 ===
+
+sum: 22
+HITS: 22
+HITS_after_gb: 0
+Begin processing the 83rd record. run: 9000001 subRun: 1 event: 83 at 24-Feb-2026 21:57:06 MSK
+slices-size: 2199
+
+=== Event ID: 83 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 84th record. run: 9000001 subRun: 1 event: 84 at 24-Feb-2026 21:57:06 MSK
+slices-size: 2199
+Begin processing the 85th record. run: 9000001 subRun: 1 event: 85 at 24-Feb-2026 21:57:06 MSK
+slices-size: 2199
+Begin processing the 86th record. run: 9000001 subRun: 1 event: 86 at 24-Feb-2026 21:57:07 MSK
+slices-size: 2253
+
+=== Event ID: 86 ===
+
+sum: 54
+HITS: 54
+HITS_after_gb: 0
+Begin processing the 87th record. run: 9000001 subRun: 1 event: 87 at 24-Feb-2026 21:57:07 MSK
+slices-size: 2405
+
+=== Event ID: 87 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 88th record. run: 9000001 subRun: 1 event: 88 at 24-Feb-2026 21:57:07 MSK
+slices-size: 2585
+
+=== Event ID: 88 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 89th record. run: 9000001 subRun: 1 event: 89 at 24-Feb-2026 21:57:08 MSK
+slices-size: 2607
+
+=== Event ID: 89 ===
+
+sum: 22
+HITS: 22
+HITS_after_gb: 22
+min: 3247867363max: 3247867967
+Begin processing the 90th record. run: 9000001 subRun: 1 event: 90 at 24-Feb-2026 21:57:08 MSK
+slices-size: 2629
+
+=== Event ID: 90 ===
+
+sum: 22
+HITS: 22
+HITS_after_gb: 0
+Begin processing the 91st record. run: 9000001 subRun: 1 event: 91 at 24-Feb-2026 21:57:08 MSK
+slices-size: 2644
+
+=== Event ID: 91 ===
+
+sum: 15
+HITS: 15
+HITS_after_gb: 15
+min: 3260666118max: 3260666716
+Begin processing the 92nd record. run: 9000001 subRun: 1 event: 92 at 24-Feb-2026 21:57:09 MSK
+slices-size: 2688
+
+=== Event ID: 92 ===
+
+sum: 44
+HITS: 44
+HITS_after_gb: 0
+Begin processing the 93rd record. run: 9000001 subRun: 1 event: 93 at 24-Feb-2026 21:57:09 MSK
+slices-size: 2738
+
+=== Event ID: 93 ===
+
+sum: 50
+HITS: 50
+HITS_after_gb: 0
+Begin processing the 94th record. run: 9000001 subRun: 1 event: 94 at 24-Feb-2026 21:57:09 MSK
+slices-size: 2738
+Begin processing the 95th record. run: 9000001 subRun: 1 event: 95 at 24-Feb-2026 21:57:09 MSK
+slices-size: 2773
+
+=== Event ID: 95 ===
+
+sum: 35
+HITS: 35
+HITS_after_gb: 0
+Begin processing the 96th record. run: 9000001 subRun: 1 event: 96 at 24-Feb-2026 21:57:10 MSK
+slices-size: 2773
+Begin processing the 97th record. run: 9000001 subRun: 1 event: 97 at 24-Feb-2026 21:57:10 MSK
+slices-size: 2831
+
+=== Event ID: 97 ===
+
+sum: 58
+HITS: 58
+HITS_after_gb: 0
+Begin processing the 98th record. run: 9000001 subRun: 1 event: 98 at 24-Feb-2026 21:57:10 MSK
+slices-size: 2952
+
+=== Event ID: 98 ===
+
+sum: 0
+HITS: 0
+HITS_after_gb: 0
+Begin processing the 99th record. run: 9000001 subRun: 1 event: 99 at 24-Feb-2026 21:57:11 MSK
+slices-size: 2952
+Begin processing the 100th record. run: 9000001 subRun: 1 event: 100 at 24-Feb-2026 21:57:11 MSK
+slices-size: 2965
+
+=== Event ID: 100 ===
+
+sum: 13
+HITS: 13
+HITS_after_gb: 0
+24-Feb-2026 21:57:12 MSK  Closed output file "datahough.artdaq.root"
+24-Feb-2026 21:57:12 MSK  Closed input file "/nova/ana/atmo_nu/select_cuts/ddtfile_10k_signal.artdaq.root"
+%MSG-i HitSub statistics:  HitSubtract:hitProducer@EndJob  24-Feb-2026 21:57:12 MSK ModuleEndJob
+ Hits statistics: 
+                       daqhit =                   2426445
+                       result =                   2426445
+%MSG
+--- novaddt::Merge2DTracks endJob 
+	Number of slices seen:          53
+	Number of tracks seen:          291
+	Number of merged tracks made:   189
+	Number of merged 3D tracks:     102
+	Number of merged 2D tracks:     87
+=== novaddt::RemoveSpatialNoise endJob
+	Number of events:           100
+	Number of slices:           70
+	Number of slices filtered:  70
+	Number of hits pruned:      31
+--- novaddt::ContainedSlice endJob
+	Number of events:           100
+	Number of slices:           70
+	Number of slices filtered:  53
+	Number of autoconfigures:   0
+	Number of DBs with any DCMs:0
+	Number of DBs with all DCMs:0
+--- novaddt::SingletonRejection end 
+	# of events:        100
+	# of hits input:    2426445
+	# of hits output:   17166
+
+TrigReport ---------- Event  Summary ------------
+TrigReport Events total = 100 passed = 6 failed = 94
+
+TrigReport ------ Modules in End-Path: end_path ------------
+TrigReport  Trig Bit#        Run    Success      Error Name
+TrigReport     0    0        100        100          0 out
+
+TimeReport ---------- Time  Summary ---[sec]----
+TimeReport CPU = 33.669759 Real = 34.325813
+
+MemReport  ---------- Memory  Summary ---[base-10 MB]----
+MemReport  VmPeak = 942.469 VmHWM = 350.192
+
+Art has completed and will exit with status 0.

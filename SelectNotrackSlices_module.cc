@@ -44,7 +44,7 @@ public:
 
   // Required functions.
   bool filter(art::Event & e) override;
-
+  size_t _size = 0;
 private:
   art::InputTag fSlicesTag;
   art::InputTag fAssnsTag;
@@ -67,8 +67,10 @@ bool novaddt::SelectNotrackSlices::filter(art::Event & e)
   for (size_t slice_id=0; slice_id<fm_tracks_in_slice.size(); slice_id++){
     const auto & tracks = fm_tracks_in_slice.at(slice_id);
     novaddt::HitList product = slices->at(slice_id);
+    _size+=slices->at(slice_id).size();
     if(tracks.size()==0) result->push_back(product);
   }
+  std::cout << "slices-size: " << _size << "\n";
   mf::LogDebug("SelectNotrackSlices")<<" selected "<<result->size()<<" slices";
   e.put(std::move(result));
   return !slices->empty();

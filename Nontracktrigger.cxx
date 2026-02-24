@@ -1,4 +1,5 @@
 #include "Nontracktrigger.h"
+#include "DDTBaseDataProducts/CompareDAQHit.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -25,7 +26,45 @@ bool TriggerNonTrack::run_algorithm(std::vector<Hit>& hits, const art::Event& ev
     
     std::cout << "HITS_after_gb: " << hits.size()   << "\n";
 
+    std::unordered_map<int, std::pair<unsigned int, unsigned int>> grouped;
+
+    for (const auto& h : hits) {
+        auto result = grouped.emplace(
+            h.hitSet_id,
+            std::make_pair(h.tdc, h.tdc)
+        );
+
+        if (!result.second) {
+            auto& mm = result.first->second;
+
+            if (h.tdc < mm.first)
+                mm.first = h.tdc;
+
+            if (h.tdc > mm.second)
+                mm.second = h.tdc;
+        }
+    }
+
+    for (const auto& kv : grouped) {
+        auto min_tdc = kv.second.first  - 300u;
+        auto max_tdc = kv.second.second + 300u;
+
+        std::cout << "min: " << min_tdc << "max: " << max_tdc << "\n";
+
+        _triggerDecisions.emplace_back(
+            min_tdc,
+            max_tdc - min_tdc,
+            daqdataformats::trigID::TRIG_ID_DATA_ATMNU,
+            1
+        );
+    }
+
     return !hits.empty();
+}
+
+std::vector<novaddt::TriggerDecision> TriggerNonTrack::TriggerDecisions() const
+{
+    return _triggerDecisions;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

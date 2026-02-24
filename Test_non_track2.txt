@@ -1,0 +1,97 @@
+%MSG-i MF_INIT_OK:  Early 21-Feb-2026 23:40:11 MSK JobSetup
+Messagelogger initialization complete.
+%MSG
+%MSG-i path:  Early 21-Feb-2026 23:40:12 MSK JobSetup
+The following module labels are not assigned to any path:
+'houghtrackercontained', 'merge2dtracks', 'multiplet', 'prescale', 'track', 'tracklong'
+
+%MSG
+DDTCore/adc_shape_fit_table_fd_460_7000_spar.root
+21-Feb-2026 23:40:13 MSK  Initiating request to open input file "/nova/ana/atmo_nu/select_cuts/ddtfile_10k_signal.artdaq.root"
+21-Feb-2026 23:40:13 MSK  Opened input file "/nova/ana/atmo_nu/select_cuts/ddtfile_10k_signal.artdaq.root"
+%MSG-i HitSub expression:  HitSubtract:hitProducer@Construction  21-Feb-2026 23:40:14 MSK ModuleConstruction
+parse string:'daqhit'
+%MSG
+--- novaddt::SingletonRejection begin
+	 Input hitlists label:    tdcsort
+	 Input hitlists instance  TDCSortedHits
+	 Min X or Y separation:   4
+	 Min Z separation:        5
+	 Min time separation:     30
+=== novaddt::RemoveSpatialNoise instantiate
+	 input hits label:        spaceslice
+	 input hits instance:     TimeSpaceSlice
+	 Max XY gap:              10
+	 Min X/Y hits:            3
+--- novaddt::ContainedSlice instantiate
+	 SliceModuleLabel:          removespatialnoise
+	 SliceInstanceLabel:        CleanTimeSpaceSlice
+	 X fiducial cuts:           5 to 379
+	 Y fiducial cuts:           7 to 377
+	 Z fiducial cuts:           10 to 886
+	 Use secondary z cuts:      0
+	 Secondary Z fiducial cuts: 0 to 896
+	 Autoconfigure:             0
+	 Autoconfigure min Z offset:3
+	 Autoconfigure max Z offset:3
+	 Autoconfigure interval:    1000
+	 Detector:                  FD
+	 AC SliceModuleLabel:       tdcsort
+	 AC SliceInstanceLabel:     TDCSortedHits
+	 Verbose:                   0
+=== novaddt::Merge2DTracks instantiate
+	 TrackModuleLabel:          houghtracker
+	 TrackInstanceLabel:        
+	 SliceModuleLabel:          selectcontainedslice
+	 SliceInstanceLabel:        ContainedTimeSpaceSlice
+	 TrackToSliceInstanceLabel: toSlices
+	 SimpleTwoViewMode:         0
+	 AlwaysMergeMin:            0
+	 MatchingMetric:            dZ
+	 AmbiguityMetric:           nhits
+	 MetricThreshold:           10
+%MSG-i FastCloning:  RootOutput:out@Construction 21-Feb-2026 23:40:14 MSK  ModuleConstruction
+Initial fast cloning configuration (user-set): false
+%MSG
+Loading table from file for 1 time.
+21-Feb-2026 23:40:19 MSK  Opened output file with pattern "datahough.artdaq.root"
+21-Feb-2026 23:40:19 MSK  Closed input file "/nova/ana/atmo_nu/select_cuts/ddtfile_10k_signal.artdaq.root"
+%MSG-i HitSub statistics:  HitSubtract:hitProducer@EndJob  21-Feb-2026 23:40:19 MSK ModuleEndJob
+ Hits statistics: 
+%MSG
+--- novaddt::Merge2DTracks endJob 
+	Number of slices seen:          0
+	Number of tracks seen:          0
+	Number of merged tracks made:   0
+	Number of merged 3D tracks:     0
+	Number of merged 2D tracks:     0
+=== novaddt::RemoveSpatialNoise endJob
+	Number of events:           0
+	Number of slices:           0
+	Number of slices filtered:  0
+	Number of hits pruned:      0
+--- novaddt::ContainedSlice endJob
+	Number of events:           0
+	Number of slices:           0
+	Number of slices filtered:  0
+	Number of autoconfigures:   0
+	Number of DBs with any DCMs:0
+	Number of DBs with all DCMs:0
+--- novaddt::SingletonRejection end 
+	# of events:        0
+	# of hits input:    0
+	# of hits output:   0
+
+TrigReport ---------- Event  Summary ------------
+TrigReport Events total = 0 passed = 0 failed = 0
+
+TrigReport ------ Modules in End-Path: end_path ------------
+TrigReport  Trig Bit#        Run    Success      Error Name
+TrigReport     0    0          0          0          0 out
+
+TimeReport ---------- Time  Summary ---[sec]----
+TimeReport CPU = 5.064835 Real = 5.195424
+
+MemReport  ---------- Memory  Summary ---[base-10 MB]----
+MemReport  VmPeak = 942.359 VmHWM = 351.592
+

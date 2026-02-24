@@ -1,0 +1,75 @@
+diff --git a/pkgs/DAQDataFormats/cxx/include/TriggerDefines.h b/pkgs/DAQDataFormats/cxx/include/TriggerDefines.h
+index 292a38f08..c68f0f320 100644
+--- a/pkgs/DAQDataFormats/cxx/include/TriggerDefines.h
++++ b/pkgs/DAQDataFormats/cxx/include/TriggerDefines.h
+@@ -306,6 +306,7 @@ namespace daqdataformats{
+     TRIG_ID_TESTBEAM_TRIGGERED = 45,
+     TRIG_ID_DATA_NNBAR = 46,
+     TRIG_ID_DATA_H_MU = 47,
++    TRIG_ID_DATA_ATMNU = 48,
+     TRIG_ID_MAX             = 88
+   };
+ 
+@@ -364,7 +365,7 @@ namespace daqdataformats{
+     TRIG_BIT_TESTBEAM_TRIGGERED    =0x00100000,   // Testbeam triggered particle
+     TRIG_BIT_DATA_NNBAR            =0x00200000,   // N-Nbar oscillation trigger
+     TRIG_BIT_DATA_H_MU             =0x00400000,   // Horizontal muon trigger
+-    TRIG_BIT_MID24            =0x00800000,   // New Triggers
++    TRIG_BIT_DATA_ATMNU            =0x00800000,   // Atmospheric neutrino trigger
+     TRIG_BIT_MID25            =0x01000000,   // New Triggers
+     TRIG_BIT_MID26            =0x02000000,   // New Triggers
+     TRIG_BIT_MID27            =0x04000000,   // New Triggers
+diff --git a/pkgs/DAQDataFormats/cxx/src/TriggerDefines.cpp b/pkgs/DAQDataFormats/cxx/src/TriggerDefines.cpp
+index 7ecfab7be..7477cd617 100644
+--- a/pkgs/DAQDataFormats/cxx/src/TriggerDefines.cpp
++++ b/pkgs/DAQDataFormats/cxx/src/TriggerDefines.cpp
+@@ -149,7 +149,7 @@ namespace daqdataformats{
+     "TBTrig",              // Bit 44
+     "DDNNBar",             // Bit 45
+     "DDHmu",               // Bit 46
+-    "ND",                  // Bit 47
++    "DDAtmnu",             // Bit 47
+     "ND",                  // Bit 48
+     "ND",                  // Bit 49
+     "ND",                  // Bit 50
+diff --git a/pkgs/NovaGlobalTrigger/config/GTConfig.xml b/pkgs/NovaGlobalTrigger/config/GTConfig.xml
+index 60ea53a53..7f4db6fb0 100644
+--- a/pkgs/NovaGlobalTrigger/config/GTConfig.xml
++++ b/pkgs/NovaGlobalTrigger/config/GTConfig.xml
+@@ -73,6 +73,7 @@
+ 	<DDT enableFlag="true" prescale="1" name= "DDFastMonoNNTest" depth="100" maxrate="50.0"/>
+ 	<DDT enableFlag="true" prescale="1" name= "DDNNBar" depth="100" maxrate="50.0"/>
+ 	<DDT enableFlag="true" prescale="1" name= "DDHmu" depth="100" maxrate="50.0"/>
++	<DDT enableFlag="true" prescale="1" name= "DDAtmnu" depth="100" maxrate="50.0"/>
+       </DDTSet>
+       <SNEWSSet>
+        <SNEWS enableFlag="true" length="10000001" delay="-128000000" prescale="1" name="SNEWSTrig" depth="100" maxrate="50.0"/>
+diff --git a/pkgs/NovaGlobalTrigger/cxx/src/GTDataTrig.cpp b/pkgs/NovaGlobalTrigger/cxx/src/GTDataTrig.cpp
+index ccba90e0c..9cbb30457 100644
+--- a/pkgs/NovaGlobalTrigger/cxx/src/GTDataTrig.cpp
++++ b/pkgs/NovaGlobalTrigger/cxx/src/GTDataTrig.cpp
+@@ -102,6 +102,7 @@ void GTDataTrig::configure(){
+     ("DDFastMonoNNTest", TRIG_ID_DATA_FASTMONONN_TEST)
+     ("DDNNBar", TRIG_ID_DATA_NNBAR)
+     ("DDHmu", TRIG_ID_DATA_H_MU)
++    ("DDAtmnu", TRIG_ID_DATA_ATMNU)
+   );
+   // Mapping of Strings to IDs in the trigger
+   setValidTrigTypes(
+@@ -131,6 +132,7 @@ void GTDataTrig::configure(){
+     (TRIG_ID_DATA_FASTMONONN_TEST,true)
+     (TRIG_ID_DATA_NNBAR,true)
+     (TRIG_ID_DATA_H_MU,true)
++    (TRIG_ID_DATA_ATMNU,true)
+   );
+   
+   return;
+@@ -234,6 +236,7 @@ void GTDataTrig::work() {
+     LogEnabledTrigs(TRIG_ID_DATA_FASTMONONN_TEST);
+     LogEnabledTrigs(TRIG_ID_DATA_NNBAR);
+     LogEnabledTrigs(TRIG_ID_DATA_H_MU);
++    LogEnabledTrigs(TRIG_ID_DATA_ATMNU);
+ 
+     std::string address = gtCfgSet.getGTConfiguration().getDDTInbox().getAddress();
+     ::mf::LogInfo("DDTInbox")<<"listening to address "<<address;
+

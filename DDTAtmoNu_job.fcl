@@ -84,7 +84,7 @@ physics:
     #houghtrackercontained, merge2dtracks, 
     houghtracker, merge2dtracksthru, 
     notrackSlices,
-   # tracklong,
+    #tracklong #,
     nontrackprocedure
 #    dcmfilter,
     ]
@@ -122,12 +122,14 @@ physics.filters.merge2dtracksthru.MinHits:           60
 
 physics.filters.selectcontainedslice.SliceModuleLabel: "removespatialnoise"
 physics.filters.selectcontainedslice.SliceInstanceLabel: "CleanTimeSpaceSlice"
+#physics.filters.houghtracker.slice_label: "removespatialnoise"
+#physics.filters.houghtracker.slice_instance: "CleanTimeSpaceSlice"
 physics.filters.houghtracker.slice_label: "selectcontainedslice"
 physics.filters.houghtracker.slice_instance: "ContainedTimeSpaceSlice"
 
 physics.filters.merge2dtracksthru.SliceModuleLabel: "selectcontainedslice"
 physics.filters.merge2dtracksthru.SliceInstanceLabel: "ContainedTimeSpaceSlice"
-
+#physics.filters.merge2dtracksthru.TrackModuleTag: "houghtracker"
 # The following two lines turn on the time reporting:
 # services.TimeTracker:                                    { }
 # services.schedulnner.wantSummary:                     true
