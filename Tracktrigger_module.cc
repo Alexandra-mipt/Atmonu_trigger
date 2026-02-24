@@ -51,7 +51,7 @@ public:
 private:
   std::string _TrackModuleTag;
   std::string _AssnsTag;
-      
+  std::string _SlicesTag;     
   Trigger _trigger;
 
   unsigned int _prescale;
@@ -63,6 +63,7 @@ private:
 novaddt::Tracktrigger::Tracktrigger(fhicl::ParameterSet const & p)
  : _TrackModuleTag(p.get<std::string>("TrackModuleTag")),
    _AssnsTag(p.get<std::string>("AssnsTag")),
+   _SlicesTag(p.get<std::string>("SlicesTag")),
    _trigger(p),
    _prescale(p.get<unsigned>("prescale")),
    _trigger_counts(0)
@@ -78,7 +79,27 @@ bool novaddt::Tracktrigger::filter(art::Event & e)
     std::vector<Track> tracks;
 
     // Get from the event
-    auto trackHandle = e.getValidHandle<std::vector<novaddt::Track3D>>(_TrackModuleTag);
+    auto slices = e.getValidHandle<std::vector<novaddt::HitList>>(_SlicesTag);
+    art::FindMany<novaddt::Track3D> fm_tracks_in_slice(slices, e, _AssnsTag);
+
+    for (size_t slice_id=0; slice_id<fm_tracks_in_slice.size(); slice_id++){ 
+        for(auto const& track : fm_tracks_in_slice.at(slice_id)) 
+        {
+            tracks.emplace_back(*track, slice_id);    
+        }
+        for(auto const& hit : slices -> at(slice_id))
+            hits.emplace_back(hit, slice_id);
+     
+    }
+
+    for(const auto& track : tracks)
+        std::cout<<"Track"<<track.sliceID<<" "<< track.StartX <<"\n";
+
+    for(const auto& hit : hits)  
+        std::cout<<"Hits"<<hit.hitSet_id<<" "<< hit.adc<<"\n";
+
+   
+/* auto trackHandle = e.getValidHandle<std::vector<novaddt::Track3D>>(_TrackModuleTag);
 
     // Connect track with HitList
     //art::FindOneP<novaddt::HitList> fohl(trackHandle, e, _TrackModuleLabel);
@@ -114,7 +135,7 @@ bool novaddt::Tracktrigger::filter(art::Event & e)
         // Добавляем трек с правильным slice_id
         tracks.emplace_back(trackHandle->at(i), slice_id); 
     }    
-
+*/
 //  std::unique_ptr<std::vector<novaddt::TriggerDecision> > 
   //  trigger_decisions(new std::vector<novaddt::TriggerDecision>());
   

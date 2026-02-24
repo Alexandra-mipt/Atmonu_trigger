@@ -33,6 +33,16 @@ bool Trigger::run_algorithm(
 {
     std::cout << "\n=== Event ID: " << event.id().event() << " ===\n" << std::endl;
     
+   // n slices
+    std::unordered_set<int> input_slice_ids;
+    for (const auto& h : hits) {
+        input_slice_ids.emplace(h.hitSet_id);
+    }
+
+    static int input_slice_cumsum = 0;
+    input_slice_cumsum += input_slice_ids.size();
+    std::cout << "input_slice_cumsum: " << input_slice_cumsum << "\n";
+
     //hcumsum += hits.size();
     //std::cout << "hcumsum: " << hcumsum << "\n";
     static int tcumsum = 0;
