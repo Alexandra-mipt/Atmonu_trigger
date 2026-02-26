@@ -99,10 +99,10 @@ public:
         double gaps_weight,   double score_threshold
     );
 
-    std::vector<TrackParams>& operator()(std::vector<TrackParams>& tracks);
+    std::vector<TrackParams>& operator()(std::vector<TrackParams>& tracks, bool is_long);
 
 private:
-    void SelectBestTracks(std::vector<TrackParams>& tracks);
+    void SelectBestTracks();
 
     void ScoreTracks(std::vector<TrackParams>& tracks);
 
@@ -188,27 +188,12 @@ private:
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-struct Counter {
-
-    int _tcumsum;
-    int _scumsum;
-    int _acumsum;
-    int _ccumsum;
-    int _sepcumsum;
-    int _rcumsum;
-
-
-    Counter(): _tcumsum(0), _scumsum(0), _acumsum(0), _ccumsum(0), _sepcumsum(0), _rcumsum(0)
-    { }
-};
-
-
 class Trigger {
 public:
     Trigger(const fhicl::ParameterSet& p);
 
     bool run_algorithm(
-        std::vector<Hit>& hits,std::vector<Track>& tracks, const art::Event& event
+        std::vector<Hit>& hits,std::vector<Track>& tracks, const art::Event& event, bool is_long
     );
 
     std::vector<novaddt::TriggerDecision> TriggerDecisions() const;

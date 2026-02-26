@@ -1,0 +1,63 @@
+%MSG-i MF_INIT_OK:  Early 26-Feb-2026 13:16:25 MSK JobSetup
+Messagelogger initialization complete.
+%MSG
+%MSG-i path:  Early 26-Feb-2026 13:16:25 MSK JobSetup
+The following module labels are not assigned to any path:
+'houghtrackercontained', 'merge2dtracks', 'multiplet', 'prescale', 'track', 'tracklong', 'trackshort'
+
+%MSG
+DDTCore/adc_shape_fit_table_fd_460_7000_spar.root
+26-Feb-2026 13:16:26 MSK  Initiating request to open input file "/nova/ana/atmo_nu/select_cuts/combined_snews_31_36.root"
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:26 MSK JobSetup
+no dictionary for class rawdata::DAQHeader is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:26 MSK JobSetup
+no dictionary for class rawdata::FlatDAQData is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:26 MSK JobSetup
+no dictionary for class rawdata::RawDigit is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:26 MSK JobSetup
+no dictionary for class rawdata::RawTrigger is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:26 MSK JobSetup
+no dictionary for class sumdata::RunData is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:27 MSK JobSetup
+no dictionary for class art::Wrapper<rawdata::DAQHeader> is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:27 MSK JobSetup
+no dictionary for class art::Wrapper<vector<rawdata::FlatDAQData> > is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:27 MSK JobSetup
+no dictionary for class art::Wrapper<vector<rawdata::RawDigit> > is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:27 MSK JobSetup
+no dictionary for class art::Wrapper<vector<rawdata::RawSumDropMB> > is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:27 MSK JobSetup
+no dictionary for class rawdata::RawSumDropMB is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:27 MSK JobSetup
+no dictionary for class art::Wrapper<vector<rawdata::RawTrigger> > is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:27 MSK JobSetup
+no dictionary for class art::Wrapper<sumdata::RunData> is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:27 MSK JobSetup
+no dictionary for class rawdata::RawSumDCM is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:27 MSK JobSetup
+no dictionary for class art::Wrapper<vector<rawdata::RawSumDCM> > is available
+%MSG
+%MSG-i Root_Information:  Early TClass::Init() 26-Feb-2026 13:16:27 MSK JobSetup
+no dictionary for class rawdata::RawSumDCMPoint is available
+%MSG
+26-Feb-2026 13:16:27 MSK  Opened input file "/nova/ana/atmo_nu/select_cuts/combined_snews_31_36.root"
+%MSG-s ArtException:  Early 26-Feb-2026 13:16:28 MSK JobSetup
+cet::exception caught in art
+---- LogicError BEGIN
+  checkDictionaries: Retrieving list of base classes for type 'rawdata::DAQHeader' returned a nullptr.
+---- LogicError END
+%MSG
+Art has completed and will exit with status 10.

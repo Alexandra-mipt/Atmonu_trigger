@@ -49,6 +49,7 @@ public:
   bool filter(art::Event & e) override;
 
 private:
+  bool        _is_long;
   std::string _TrackModuleTag;
   std::string _AssnsTag;
   std::string _SlicesTag;     
@@ -61,7 +62,8 @@ private:
 
 
 novaddt::Tracktrigger::Tracktrigger(fhicl::ParameterSet const & p)
- : _TrackModuleTag(p.get<std::string>("TrackModuleTag")),
+ : _is_long(p.get<bool>("is_long_procedure")),
+   _TrackModuleTag(p.get<std::string>("TrackModuleTag")),
    _AssnsTag(p.get<std::string>("AssnsTag")),
    _SlicesTag(p.get<std::string>("SlicesTag")),
    _trigger(p),
@@ -92,12 +94,12 @@ bool novaddt::Tracktrigger::filter(art::Event & e)
      
     }
 
-    for(const auto& track : tracks)
+   /* for(const auto& track : tracks)
         std::cout<<"Track"<<track.sliceID<<" "<< track.StartX <<"\n";
 
     for(const auto& hit : hits)  
         std::cout<<"Hits"<<hit.hitSet_id<<" "<< hit.adc<<"\n";
-
+*/
    
 /* auto trackHandle = e.getValidHandle<std::vector<novaddt::Track3D>>(_TrackModuleTag);
 
@@ -142,7 +144,7 @@ bool novaddt::Tracktrigger::filter(art::Event & e)
     std::unique_ptr<std::vector<novaddt::TriggerDecision>> trigger_decisions(new std::vector<novaddt::TriggerDecision>);
 
   // Run trigger algorithm
-    bool passed = _trigger.run_algorithm(hits, tracks, e);
+    bool passed = _trigger.run_algorithm(hits, tracks, e, _is_long);
 
 
   if (passed) {

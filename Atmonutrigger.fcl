@@ -6,7 +6,7 @@ track_long_procedure:
     module_type:       "Tracktrigger"
     TrackModuleTag:    "merge2dtracksthru:"
     AssnsTag:          "merge2dtracksthru:toSlices"
-
+    SlicesTag:         "selectcontainedslice:ContainedTimeSpaceSlice"
 
 # Trigger Configuration
                          is_long_procedure: true
@@ -39,9 +39,9 @@ track_short_procedure:
     module_type:       "Tracktrigger"
     TrackModuleTag:    "merge2dtracksthru:"
     AssnsTag:          "merge2dtracksthru:toSlices"
- 
+    SlicesTag:         "selectcontainedslice:ContainedTimeSpaceSlice" 
 # Trigger Configuration
-
+                        is_long_procedure: false
                         gaps_min:         0.0
                         gaps_max:         1e9
                         length_min:       40.0
@@ -54,11 +54,16 @@ track_short_procedure:
                         length_weight:    0.5
                         hits_weight:      0.1
                         gaps_weight:      0.8
+                        score_threshold:  1000000
     
                         xz_cut:          19.8
                         yz_cut:          24
                         xy_cut:          0.0
-    
+                        
+                        min_hits:        10000000
+
+                        prescale:        1
+
 }
 
 non_track_procedure:

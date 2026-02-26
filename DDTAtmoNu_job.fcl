@@ -65,6 +65,7 @@ physics:
     merge2dtracksthru:      @local::standard_merge2dtracks_hough
     prescale:               @local::standard_sliceprescale
     tracklong:              @local::track_long_procedure  
+    trackshort:             @local::track_short_procedure
     nontrackprocedure:      @local::non_track_procedure
     notrackSlices:    {
         module_type:"SelectNotrackSlices"
@@ -85,6 +86,7 @@ physics:
     houghtracker, merge2dtracksthru, 
     notrackSlices,
     #tracklong #,
+    #trackshort #,
     nontrackprocedure
 #    dcmfilter,
     ]
@@ -129,7 +131,7 @@ physics.filters.houghtracker.slice_instance: "ContainedTimeSpaceSlice"
 
 physics.filters.merge2dtracksthru.SliceModuleLabel: "selectcontainedslice"
 physics.filters.merge2dtracksthru.SliceInstanceLabel: "ContainedTimeSpaceSlice"
-#physics.filters.merge2dtracksthru.TrackModuleTag: "houghtracker"
+#physics.filters.merge2dtracksthru.TrackModuleTag: "houghtracker:toSlices"
 # The following two lines turn on the time reporting:
 # services.TimeTracker:                                    { }
 # services.schedulnner.wantSummary:                     true

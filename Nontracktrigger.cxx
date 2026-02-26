@@ -23,8 +23,17 @@ bool TriggerNonTrack::run_algorithm(std::vector<Hit>& hits, const art::Event& ev
     std::cout << "HITS: " << hits.size()   << "\n";    
 
     _GradientBoostingModel(hits, features);
+
+    std::unordered_set<int> eid_unique;
+        
+    for (const auto& h : hits) eid_unique.emplace(h.hitSet_id);
+        
+    static int counter = 0;
+    counter += eid_unique.size();
+
+    std::cout << "Slices after gb_model: " << counter << "\n";
     
-    std::cout << "HITS_after_gb: " << hits.size()   << "\n";
+    // std::cout << "HITS_after_gb: " << hits.size()   << "\n";
 
     std::unordered_map<int, std::pair<unsigned int, unsigned int>> grouped;
 
@@ -255,10 +264,10 @@ void GradientBoostingModel::operator()(std::vector<Hit>& hits, std::vector<Featu
     
     for (size_t i = 0; i < features.size(); ++i) {
         if (proba[i][1] > thr_opt) { // 0.63875492f
-            out = std::move(hits);
-            //Hit h;
-            //h.hitSet_id = features[i].hitSet_id;
-            //out.push_back(h);
+            for (const auto& h : hits) {
+                if (h.hitSet_id == features[i].hitSet_id) out.push_back(h);
+            }
+ 
         }
     }
 

@@ -1,0 +1,26 @@
+BEGIN_PROLOG
+standard_containedslice:                                                                              
+{
+    module_type:        ContainedSlice                                                                
+    SliceModuleLabel:   removeonedslices# module making tracks                                        
+    SliceInstanceLabel: TwoDSlices      # instance making tracks                                      
+    Xmin:               5           # lower x fiducial cut (there are 384 FD cells per plane)         
+    Xmax:               379         # upper x fiducial cut                                            
+    Ymin:               7           # lower y fiducial cut
+    Ymax:               377         # upper y fiducial cut                                            
+    Zmin:               10           # lower z fiducial cut (there are 896 FD planes)                  
+    Zmax:               886         # upper z fiducial cut                                            
+    UseSecondaryZCuts:  false       # Apply the optional secondary z cuts
+    SecondaryZmin:      0           # optional secondary lower z fiducial cut                         
+    SecondaryZmax:      896         # optional secondary upper z fiducial cut                         
+    Autoconfigure:      false       # Autoconfigure z containment cuts                                
+    AutoconfigureMinZOffset:  3     # The distance from the lower edge set by autoconfigure           
+    AutoconfigureMaxZOffset:  3     # The distance from the upper edge set by autoconfigure           
+    AutoconfigureInterval: 1000     # Run autoconfigure after every this number of events             
+    Detector:           FD          # Detector, can be one of FD, ND or NDOS                          
+    AutoconfigureSliceModuleLabel:   tdcsort        # module making tracks 
+    AutoconfigureSliceInstanceLabel: TDCSortedHits  # instance making tracks                          
+    Verbose:            false        
+    }
+END_PROLOG
+

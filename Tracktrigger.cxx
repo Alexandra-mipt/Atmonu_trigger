@@ -24,13 +24,12 @@ Trigger::Trigger(fhicl::ParameterSet const& p):
     _SeparateHitsWithTracksRestActivity(
         p.get<double>("epsilon")),
     _RestActivityCut(p.get<double>("min_hits"))
-    //_counter()
 { }
 
 bool Trigger::run_algorithm(
-    std::vector<Hit>& hits,std::vector<Track>& tracks, const art::Event& event
+    std::vector<Hit>& hits,std::vector<Track>& tracks, const art::Event& event, bool is_long
 )
-{
+{   
     std::cout << "\n=== Event ID: " << event.id().event() << " ===\n" << std::endl;
     
    // n slices
@@ -55,7 +54,7 @@ bool Trigger::run_algorithm(
     pcumsum += paramTracks.size();
     std::cout << "pcumsum: " << pcumsum << "\n";
     
-    auto& scoreTracks = _Score(paramTracks);
+    auto& scoreTracks = _Score(paramTracks, is_long);
 
     static int scumsum = 0;
     scumsum += scoreTracks.size();
@@ -76,19 +75,23 @@ bool Trigger::run_algorithm(
     chcumsum += filteredHits.size();
     std::cout << "chcumsum: " << chcumsum << "\n";
     
+    std::vector<Hit> restHits = filteredHits;
+
+    if(is_long){
     _SeparateHitsWithTracksRestActivity(filteredHits, filteredTracks);
  
     static int sepcumsum = 0;
     sepcumsum += filteredHits.size();
     std::cout << "sepcumsum: " << sepcumsum << "\n";
 
-    auto& restHits = _SeparateHitsWithTracksRestActivity.GetHits();
+    restHits = _SeparateHitsWithTracksRestActivity.GetHits();
     _RestActivityCut(restHits);
 
     static int rcumsum = 0;
     rcumsum += restHits.size();
     std::cout << "rcumsum: " << rcumsum << "\n";
-
+    
+    }
     
     std::unordered_map<int, std::pair<unsigned int, unsigned int>> grouped;
 
@@ -270,45 +273,22 @@ Score::Score(
     gaps_weight(gaps_weight),     score_threshold(score_threshold)
 { }
 
-std::vector<TrackParams>& Score::operator()(std::vector<TrackParams>& tracks)
+std::vector<TrackParams>& Score::operator()(std::vector<TrackParams>& tracks, bool is_long)
 {
     _scoreTracks.clear();
 
     ScoreTracks(tracks);
     
-    SelectBestTracks(tracks);
+    if (is_long){
+        SelectBestTracks();
 
+    }
+    
     return _scoreTracks;
 }
 
 void Score::ScoreTracks(std::vector<TrackParams>& tracks)
 {
-/*
-    std::vector<double> lengths, hits, gaps;
-
-    for (const auto& t : tracks) {
-        lengths.push_back(t.track_length);
-        hits.push_back(static_cast<double>(t.total_hits));
-        gaps.push_back(t.gaps_per_length);
-    }
-
-    std::sort(lengths.begin(), lengths.end());
-    std::sort(hits.begin(), hits.end());
-    std::sort(gaps.begin(), gaps.end());
-
-    double m_len  = Quantile(lengths, 0.5);
-    double q1_len = Quantile(lengths, 0.25);
-    double q3_len = Quantile(lengths, 0.75);
-
-    double m_hit  = Quantile(hits, 0.5);
-    double q1_hit = Quantile(hits, 0.25);
-    double q3_hit = Quantile(hits, 0.75);
-
-    double m_gap  = Quantile(gaps, 0.5);
-    double q1_gap = Quantile(gaps, 0.25);
-    double q3_gap = Quantile(gaps, 0.75);
-*/
-
     double m_len  = 70.285133;
     double q1_len = 54.196402;
     double q3_len = 96.341832;
@@ -321,34 +301,38 @@ void Score::ScoreTracks(std::vector<TrackParams>& tracks)
     double q1_gap = 0.058823529;
     double q3_gap = 0.33333333;
 
-    std::vector<TrackParams> scored;
-
+    std::map<int, TrackParams> best;
+    
     for (auto& t : tracks) {
         double norm_len =  RobustNormalize(t.track_length, m_len, q1_len, q3_len);
         double norm_hit =  RobustNormalize(t.total_hits,  m_hit, q1_hit, q3_hit);
         double norm_gap = -RobustNormalize(t.gaps_per_length, m_gap, q1_gap, q3_gap);
 
         t.score = length_weight  * norm_len + hits_weight * norm_hit + gaps_weight * norm_gap;
-    }
-}
-
-void Score::SelectBestTracks(std::vector<TrackParams>& tracks)
-{
-    std::map<int, TrackParams> best;
-
-    for (const auto& t : tracks) {
-        if (t.score <= score_threshold) continue;
-
+        
         auto key = t.sliceID;
 
         if (!best.count(key) || t.score > best[key].score)
             best[key] = t;
-    }
 
+    }
     _scoreTracks.reserve(best.size());
+    
     for (auto& pair : best) {
         _scoreTracks.push_back(pair.second);
     }
+
+}
+
+void Score::SelectBestTracks()
+{
+
+    std::vector<TrackParams> scoreafterthr;
+    for (const auto& t : _scoreTracks) {
+        if (t.score > score_threshold)
+            scoreafterthr.push_back(t);
+    }
+    _scoreTracks = std::move(scoreafterthr);
 }
 
 double Score::Quantile(const std::vector<double>& sorted, double q)
